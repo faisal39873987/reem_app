@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ReemVerse</string>
+
+    <!-- ✅ Facebook SDK values -->
+    <string name="facebook_app_id">123456789012345</string> <!-- استبدل بالـ real App ID -->
+    <string name="facebook_client_token">YOUR_CLIENT_TOKEN_HERE</string> <!-- استبدل بالتوكين الحقيقي -->
+</resources>
