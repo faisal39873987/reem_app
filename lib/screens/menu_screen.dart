@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'notification_screen.dart';
 import 'chat_list_screen.dart';
 import 'search_screen.dart';
@@ -6,8 +9,7 @@ import 'post_creation_screen.dart';
 import 'menu/account_screen.dart';
 import 'menu/privacy_policy_screen.dart';
 import 'menu/contact_us_screen.dart';
-import '../services/auth_service.dart';
-import 'package:reem_verse_rebuild/screens/login_screen.dart';
+import 'login_screen.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -112,10 +114,14 @@ class MainMenuScreen extends StatelessWidget {
                 Card(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
-                    leading: const Icon(Icons.logout, color: blueColor),
-                    title: const Text("Logout", style: TextStyle(color: blueColor)),
+                    leading: const Icon(Icons.logout, color: Colors.red),
+                    title: const Text("Logout", style: TextStyle(color: Colors.red)),
                     onTap: () async {
-                      await AuthService().signOut();
+                      await FirebaseAuth.instance.signOut();
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('isLoggedIn', false);
+
+                      if (!context.mounted) return;
                       Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(builder: (_) => const LoginScreen()),
                         (route) => false,

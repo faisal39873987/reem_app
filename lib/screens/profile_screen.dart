@@ -23,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _userName = '';
   File? _profileImage;
   String _imageUrl = '';
-  bool _isLoading = false;
+  bool _isLoading = true;
   bool _showInReemYouth = true;
 
   @override
@@ -33,20 +33,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
 
-    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-    final data = doc.data();
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final data = doc.data();
 
-    setState(() {
-      _userName = user.displayName ?? '';
-      _bioController.text = data?['bio'] ?? '';
-      _phoneController.text = data?['phone'] ?? '';
-      _noteController.text = data?['note'] ?? '';
-      _imageUrl = data?['imageUrl'] ?? '';
-      _showInReemYouth = data?['showInReemYouth'] ?? true;
-    });
+      if (mounted) {
+        setState(() {
+          _userName = data?['name'] ?? 'User';
+          _bioController.text = data?['bio'] ?? '';
+          _phoneController.text = data?['phone'] ?? '';
+          _noteController.text = data?['note'] ?? '';
+          _imageUrl = data?['imageUrl'] ?? '';
+          _showInReemYouth = data?['showInReemYouth'] ?? true;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _saveProfile() async {
@@ -60,13 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (_profileImage != null) {
         final ref = FirebaseStorage.instance.ref().child('user_images/${user.uid}.jpg');
-        final uploadTask = ref.putFile(_profileImage!).timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            throw TimeoutException("Upload timeout");
-          },
-        );
-        await uploadTask;
+        await ref.putFile(_profileImage!).timeout(const Duration(seconds: 20));
         newImageUrl = await ref.getDownloadURL();
       }
 
@@ -79,34 +80,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'showInReemYouth': _showInReemYouth,
       }, SetOptions(merge: true));
 
-      await user.reload();
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Profile updated")),
-      );
-    } on FirebaseException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Upload error: ${e.message}")),
-      );
-    } on TimeoutException {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Upload timed out")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Profile updated")),
+        );
+        setState(() {
+          _imageUrl = newImageUrl;
+          _profileImage = null;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Unexpected error")),
-      );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ Failed to update profile")),
+        );
+      }
     }
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() => _profileImage = File(pickedFile.path));
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _profileImage = File(picked.path));
     }
+  }
+
+  Widget _buildAvatar() {
+    ImageProvider imageProvider;
+
+    if (_profileImage != null) {
+      imageProvider = FileImage(_profileImage!);
+    } else if (_imageUrl.isNotEmpty) {
+      imageProvider = NetworkImage(_imageUrl);
+    } else {
+      imageProvider = const AssetImage('assets/images/default_user.png');
+    }
+
+    return CircleAvatar(
+      radius: 60,
+      backgroundColor: Colors.grey[200],
+      backgroundImage: imageProvider,
+    );
   }
 
   @override
@@ -121,68 +137,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    const blueColor = Color(0xFF1877F2);
+    const blue = Color(0xFF1877F2);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        title: const Text("Profile", style: TextStyle(color: blue)),
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const Text("Profile", style: TextStyle(color: blueColor, fontWeight: FontWeight.bold)),
         actions: [
           if (isOwner)
             IconButton(
-              icon: const Icon(Icons.save, color: blueColor),
+              icon: const Icon(Icons.save, color: blue),
               onPressed: _saveProfile,
             )
         ],
+        iconTheme: const IconThemeData(color: blue),
       ),
-      body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16).copyWith(bottom: 32),
-                child: Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage: _profileImage != null
-                              ? FileImage(_profileImage!)
-                              : (_imageUrl.isNotEmpty ? NetworkImage(_imageUrl) : null) as ImageProvider?,
-                          child: _imageUrl.isEmpty && _profileImage == null
-                              ? const Icon(Icons.person, size: 60, color: Colors.white)
-                              : null,
-                        ),
-                        if (isOwner)
-                          IconButton(
-                            icon: const Icon(Icons.camera_alt, color: Colors.blue),
-                            onPressed: _pickImage,
-                          )
-                      ],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      _buildAvatar(),
+                      if (isOwner)
+                        IconButton(
+                          icon: const Icon(Icons.camera_alt, color: Colors.blue),
+                          onPressed: _pickImage,
+                        )
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(_userName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 24),
+                  _buildEditableField("Bio", _bioController, isOwner),
+                  const SizedBox(height: 16),
+                  _buildEditableField("Phone", _phoneController, isOwner),
+                  const SizedBox(height: 16),
+                  _buildEditableField("Note", _noteController, isOwner),
+                  const SizedBox(height: 16),
+                  if (isOwner)
+                    SwitchListTile(
+                      title: const Text("Appear in Reem Youth"),
+                      value: _showInReemYouth,
+                      onChanged: (val) => setState(() => _showInReemYouth = val),
                     ),
-                    const SizedBox(height: 20),
-                    Text(_userName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 24),
-                    _buildEditableField("Bio", _bioController, isOwner),
-                    const SizedBox(height: 16),
-                    _buildEditableField("Phone", _phoneController, isOwner),
-                    const SizedBox(height: 16),
-                    _buildEditableField("Note", _noteController, isOwner),
-                    const SizedBox(height: 16),
-                    if (isOwner)
-                      SwitchListTile(
-                        title: const Text("Appear in Reem Youth"),
-                        value: _showInReemYouth,
-                        onChanged: (value) => setState(() => _showInReemYouth = value),
-                      ),
-                  ],
-                ),
+                ],
               ),
-      ),
+            ),
     );
   }
 
