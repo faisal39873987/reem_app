@@ -66,8 +66,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String newImageUrl = _imageUrl;
 
       if (_profileImage != null) {
-        final ref = FirebaseStorage.instance.ref().child('user_images/${user.uid}.jpg');
-        await ref.putFile(_profileImage!).timeout(const Duration(seconds: 20));
+        // Store the image using the UID as the filename to comply with
+        // the Firebase Storage security rules.
+        final filePath = 'user_images/${user.uid}.jpg';
+        final ref = FirebaseStorage.instance.ref().child(filePath);
+        await ref.putFile(_profileImage!);
         newImageUrl = await ref.getDownloadURL();
       }
 
