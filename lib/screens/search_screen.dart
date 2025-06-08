@@ -26,7 +26,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Stream<List<QueryDocumentSnapshot>> _getCombinedResults(String term) async* {
+  Future<List<QueryDocumentSnapshot>> _getCombinedResults(String term) async {
     final posts = await FirebaseFirestore.instance
         .collection('posts')
         .where('description', isGreaterThanOrEqualTo: term)
@@ -39,7 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
         .where('title', isLessThanOrEqualTo: '$term\uf8ff')
         .get();
 
-    yield [...posts.docs, ...services.docs];
+    return [...posts.docs, ...services.docs];
   }
 
   @override
@@ -106,11 +106,14 @@ class _SearchScreenState extends State<SearchScreen> {
             Expanded(
               child: _searchTerm.isEmpty
                   ? const Center(child: Text("Enter a keyword to search"))
-                  : StreamBuilder<List<QueryDocumentSnapshot>>(
-                      stream: _getCombinedResults(_searchTerm),
+                  : FutureBuilder<List<QueryDocumentSnapshot>>(
+                      future: _getCombinedResults(_searchTerm),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(child: Text("Error loading results"));
                         }
                         if (!snapshot.hasData || snapshot.data!.isEmpty) {
                           return const Center(child: Text("No results found"));
