@@ -31,13 +31,15 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   }
 
   Future<void> _checkLiked() async {
-    if (currentUser == null) return;
-    final doc = await _likesRef.doc(currentUser!.uid).get();
-    if (mounted) setState(() => _isLiked = doc.exists);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final doc = await _likesRef.doc(user.uid).get();
+    if (!mounted) return;
+    setState(() => _isLiked = doc.exists);
   }
 
   void _toggleLike() async {
-    final userId = currentUser?.uid;
+    final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
 
     final doc = _likesRef.doc(userId);
@@ -45,20 +47,23 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
 
     if (exists) {
       await doc.delete();
+      if (!mounted) return;
       setState(() => _isLiked = false);
     } else {
       await doc.set({'likedAt': Timestamp.now()});
+      if (!mounted) return;
       setState(() => _isLiked = true);
     }
   }
 
   void _addComment() async {
     final text = _commentController.text.trim();
-    if (text.isEmpty || currentUser == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (text.isEmpty || user == null) return;
 
     await _commentsRef.add({
-      'userId': currentUser!.uid,
-      'userName': currentUser!.displayName ?? 'User',
+      'userId': user.uid,
+      'userName': user.displayName ?? 'User',
       'text': text,
       'timestamp': Timestamp.now(),
     });
@@ -81,7 +86,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       body: FutureBuilder<DocumentSnapshot>(
         future: _postRef.get(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData || snapshot.data == null) return const Center(child: CircularProgressIndicator());
           if (!snapshot.data!.exists) return const Center(child: Text("Post not found."));
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
@@ -172,7 +177,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                         StreamBuilder<QuerySnapshot>(
                           stream: _likesRef.snapshots(),
                           builder: (context, snapshot) {
-                            if (!snapshot.hasData) return const SizedBox();
+                            if (!snapshot.hasData || snapshot.data == null) return const SizedBox();
                             return Text("${snapshot.data!.docs.length} likes", style: const TextStyle(fontSize: 14));
                           },
                         ),
@@ -200,7 +205,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _commentsRef.orderBy('timestamp', descending: true).snapshots(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                    if (!snapshot.hasData || snapshot.data == null) return const Center(child: CircularProgressIndicator());
                     final comments = snapshot.data!.docs;
                     if (comments.isEmpty) return const Center(child: Text("No comments yet."));
                     return ListView.separated(

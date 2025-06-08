@@ -126,6 +126,8 @@ class MainMenuScreen extends StatelessWidget {
                         '/login',
                         (route) => false,
                       );
+                      Navigator.of(context)
+                          .pushNamedAndRemoveUntil('/login', (route) => false);
                     },
                   ),
                 ),

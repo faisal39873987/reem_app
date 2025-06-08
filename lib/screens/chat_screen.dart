@@ -58,20 +58,26 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text.trim();
     if (_uid == null || text.isEmpty) return;
 
-    await _messagesRef.add({
+    final messageRef = _messagesRef.doc();
+    final messageData = {
       'text': text,
       'senderId': _uid,
       'senderName': FirebaseAuth.instance.currentUser?.displayName ?? 'User',
       'senderPhotoUrl': FirebaseAuth.instance.currentUser?.photoURL ?? '',
       'timestamp': Timestamp.now(),
       'seenBy': [_uid],
-    });
+    };
 
-    await _chatRef.set({
-      'users': [_uid, widget.receiverId],
+    final chatData = {
+      'participants': [_uid, widget.receiverId],
       'lastMessage': text,
       'lastMessageTime': Timestamp.now(),
-    }, SetOptions(merge: true));
+    };
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.set(_chatRef, chatData, SetOptions(merge: true));
+      transaction.set(messageRef, messageData);
+    });
 
     _controller.clear();
     _setTyping(false);
@@ -102,6 +108,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 stream: _chatRef.collection('typing').doc(widget.receiverId).snapshots(),
                 builder: (context, snapshot) {
                   final isTyping = snapshot.data?.get('typing') == true;
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const SizedBox.shrink();
+                  }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -125,7 +134,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _messagesRef.orderBy('timestamp', descending: false).snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData || snapshot.data == null) return const Center(child: CircularProgressIndicator());
 
                 final messages = snapshot.data!.docs;
                 if (messages.isEmpty) return const Center(child: Text('No messages yet.'));

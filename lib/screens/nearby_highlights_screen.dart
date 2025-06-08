@@ -33,6 +33,7 @@ class _NearbyHighlightsScreenState extends State<NearbyHighlightsScreen> {
 
       final allDocs = query.docs;
       if (allDocs.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _loading = false;
           _swipeItems = [];
@@ -57,14 +58,14 @@ class _NearbyHighlightsScreenState extends State<NearbyHighlightsScreen> {
         );
       }).toList();
 
-      if (mounted) {
-        setState(() {
-          _matchEngine = MatchEngine(swipeItems: _swipeItems);
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _matchEngine = MatchEngine(swipeItems: _swipeItems);
+        _loading = false;
+      });
     } catch (e) {
       print("❌ Error loading products: $e");
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
