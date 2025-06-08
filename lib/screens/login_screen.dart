@@ -21,6 +21,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   bool _isLoading = false;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  void _loadSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('savedEmail');
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      _emailController.text = savedEmail;
+      setState(() => _rememberMe = true);
+    }
+  }
 
   void _login() async {
     if (!mounted) return;
@@ -33,6 +49,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
+      if (_rememberMe) {
+        await prefs.setString('savedEmail', _emailController.text.trim());
+      } else {
+        await prefs.remove('savedEmail');
+      }
 
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
@@ -135,6 +156,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   labelText: "Password",
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _rememberMe,
+                    onChanged: (val) {
+                      setState(() => _rememberMe = val ?? false);
+                    },
+                  ),
+                  const Text('Remember me'),
+                ],
               ),
               const SizedBox(height: 20),
               _isLoading
