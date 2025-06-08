@@ -58,20 +58,32 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text.trim();
     if (_uid == null || text.isEmpty) return;
 
-    await _messagesRef.add({
-      'text': text,
-      'senderId': _uid,
-      'senderName': FirebaseAuth.instance.currentUser?.displayName ?? 'User',
-      'senderPhotoUrl': FirebaseAuth.instance.currentUser?.photoURL ?? '',
-      'timestamp': Timestamp.now(),
-      'seenBy': [_uid],
-    });
+    await FirebaseFirestore.instance.runTransaction((tx) async {
+      final chatSnap = await tx.get(_chatRef);
 
-    await _chatRef.set({
-      'users': [_uid, widget.receiverId],
-      'lastMessage': text,
-      'lastMessageTime': Timestamp.now(),
-    }, SetOptions(merge: true));
+      final messageRef = _messagesRef.doc();
+      tx.set(messageRef, {
+        'text': text,
+        'senderId': _uid,
+        'senderName': FirebaseAuth.instance.currentUser?.displayName ?? 'User',
+        'senderPhotoUrl': FirebaseAuth.instance.currentUser?.photoURL ?? '',
+        'timestamp': Timestamp.now(),
+        'seenBy': [_uid],
+      });
+
+      if (!chatSnap.exists) {
+        tx.set(_chatRef, {
+          'participants': [_uid, widget.receiverId],
+          'lastMessage': text,
+          'lastMessageTime': Timestamp.now(),
+        });
+      } else {
+        tx.update(_chatRef, {
+          'lastMessage': text,
+          'lastMessageTime': Timestamp.now(),
+        });
+      }
+    });
 
     _controller.clear();
     _setTyping(false);
@@ -101,7 +113,11 @@ class _ChatScreenState extends State<ChatScreen> {
               child: StreamBuilder<DocumentSnapshot>(
                 stream: _chatRef.collection('typing').doc(widget.receiverId).snapshots(),
                 builder: (context, snapshot) {
-                  final isTyping = snapshot.data?.get('typing') == true;
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return Text(widget.receiverName,
+                        style: const TextStyle(color: blueColor, fontWeight: FontWeight.bold));
+                  }
+                  final isTyping = snapshot.data!.get('typing') == true;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -125,7 +141,9 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _messagesRef.orderBy('timestamp', descending: false).snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData || snapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
                 final messages = snapshot.data!.docs;
                 if (messages.isEmpty) return const Center(child: Text('No messages yet.'));
