@@ -53,7 +53,6 @@ class _LandingScreenState extends State<LandingScreen> {
     if (!seen) {
       setState(() => _showIntro = true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -62,9 +61,9 @@ class _LandingScreenState extends State<LandingScreen> {
             onFinish: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setBool('intro_done', true);
-              if (mounted) {
-                setState(() => _showIntro = false);
-                Navigator.of(context).pop();
+              if (!mounted) return;
+              setState(() => _showIntro = false);
+              Navigator.of(context).pop();
               }
             },
           ),
@@ -162,6 +161,7 @@ class _HomePageContentState extends State<HomePageContent> {
   Future<void> _fetchLocation() async {
     try {
       final pos = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
       setState(() => _userLocation = pos);
     } catch (e) {
       debugPrint("📍 Location error: $e");
@@ -301,6 +301,7 @@ class _HomePageContentState extends State<HomePageContent> {
                     return FutureBuilder<DocumentSnapshot>(
                       future: FirebaseFirestore.instance.collection('users').doc(creatorId).get(),
                       builder: (context, userSnapshot) {
+                        if (!userSnapshot.hasData || userSnapshot.data == null) return SizedBox.shrink();
                         final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
 
                         final userName = userData?['name'] ?? 'User';
@@ -330,7 +331,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                       leading: CircleAvatar(
                                         backgroundImage: userImage.isNotEmpty
                                             ? NetworkImage(userImage)
-                                            : const AssetImage('assets/user.png')
+                                            : const AssetImage('assets/images/default_user.png')
                                                 as ImageProvider,
                                         radius: 20,
                                       ),
@@ -393,7 +394,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                           FutureBuilder<DocumentSnapshot>(
                                             future: FirebaseFirestore.instance.collection('posts').doc(postId).get(),
                                             builder: (context, snapshot) {
-                                              if (!snapshot.hasData) return const SizedBox.shrink();
+                                              if (!snapshot.hasData || snapshot.data == null) return const SizedBox.shrink();
                                               final postData = snapshot.data!.data() as Map<String, dynamic>;
                                               final count = postData['likesCount'] ?? 0;
                                               return Padding(
@@ -447,6 +448,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                                       ),
                                                     ),
                                                   );
+                                                  if (!mounted) return;
 
                                                   setState(() => _isNavigating = false);
                                                 },

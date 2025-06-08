@@ -10,6 +10,7 @@ import 'package:reem_verse_rebuild/screens/landing_screen.dart';
 import 'package:reem_verse_rebuild/screens/notification_screen.dart';
 import 'package:reem_verse_rebuild/screens/chat_list_screen.dart';
 import 'package:reem_verse_rebuild/screens/search_screen.dart';
+import 'package:reem_verse_rebuild/screens/login_screen.dart';
 
 class PostCreationScreen extends StatefulWidget {
   const PostCreationScreen({super.key});
@@ -53,6 +54,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
     }
 
     final position = await Geolocator.getCurrentPosition();
+    if (!mounted) return;
     setState(() {
       _latitude = position.latitude;
       _longitude = position.longitude;
@@ -61,6 +63,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
 
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (!mounted) return;
     if (pickedFile != null) {
       setState(() => _imageFile = File(pickedFile.path));
     }
@@ -72,7 +75,9 @@ final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.isAnonymous) {
       _showSnack("You must be logged in to create a post.");
       Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       });
       return;
     }
@@ -136,6 +141,7 @@ final user = FirebaseAuth.instance.currentUser;
       print("❌ Upload Error: $e");
       _showSnack("❌ Something went wrong. Try again.");
     } finally {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }

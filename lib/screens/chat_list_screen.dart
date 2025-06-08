@@ -8,9 +8,10 @@ class ChatListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
+    final user = FirebaseAuth.instance.currentUser;
+    final uid = user?.uid;
 
-    if (uid == null || FirebaseAuth.instance.currentUser!.isAnonymous) {
+    if (uid == null || (user?.isAnonymous ?? true)) {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -44,11 +45,11 @@ class ChatListScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
-            .where('users', arrayContains: uid)
+            .where('participants', arrayContains: uid)
             .orderBy('lastMessageTime', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -64,13 +65,18 @@ class ChatListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final chat = chats[index];
               final data = chat.data() as Map<String, dynamic>;
-              final users = List<String>.from(data['users']);
+              final users = List<String>.from(data['participants']);
               final otherUserId = users.firstWhere((id) => id != uid);
 
               return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(otherUserId)
+                    .get(),
                 builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData) return const SizedBox.shrink();
+                  if (!userSnapshot.hasData || userSnapshot.data == null) {
+                    return const SizedBox.shrink();
+                  }
 
                   final userData = userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
                   final displayName = userData['name'] ?? 'User';

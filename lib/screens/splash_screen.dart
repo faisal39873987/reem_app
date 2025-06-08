@@ -31,13 +31,22 @@ class _SplashScreenState extends State<SplashScreen> {
     if (user != null) {
       Navigator.of(context).pushReplacementNamed('/landing');
     } else if (isFirstTime) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-      );
-    } else {
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
+if (!mounted) return;
+
+if (user != null) {
+  Navigator.of(context).pushReplacementNamed('/landing');
+} else {
+  Widget targetScreen;
+  if (isFirstTime) {
+    targetScreen = const OnboardingScreen();
+  } else {
+    targetScreen = const LoginScreen();
   }
+
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(builder: (_) => targetScreen),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
