@@ -58,20 +58,26 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _controller.text.trim();
     if (_uid == null || text.isEmpty) return;
 
-    await _messagesRef.add({
+    final messageRef = _messagesRef.doc();
+    final messageData = {
       'text': text,
       'senderId': _uid,
       'senderName': FirebaseAuth.instance.currentUser?.displayName ?? 'User',
       'senderPhotoUrl': FirebaseAuth.instance.currentUser?.photoURL ?? '',
       'timestamp': Timestamp.now(),
       'seenBy': [_uid],
-    });
+    };
 
-    await _chatRef.set({
-      'users': [_uid, widget.receiverId],
+    final chatData = {
+      'participants': [_uid, widget.receiverId],
       'lastMessage': text,
       'lastMessageTime': Timestamp.now(),
-    }, SetOptions(merge: true));
+    };
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.set(_chatRef, chatData, SetOptions(merge: true));
+      transaction.set(messageRef, messageData);
+    });
 
     _controller.clear();
     _setTyping(false);

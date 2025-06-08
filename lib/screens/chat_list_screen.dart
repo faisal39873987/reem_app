@@ -45,7 +45,7 @@ class ChatListScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
-            .where('users', arrayContains: uid)
+            .where('participants', arrayContains: uid)
             .orderBy('lastMessageTime', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -65,7 +65,7 @@ class ChatListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final chat = chats[index];
               final data = chat.data() as Map<String, dynamic>;
-              final users = List<String>.from(data['users']);
+              final users = List<String>.from(data['participants']);
               final otherUserId = users.firstWhere((id) => id != uid);
 
               return FutureBuilder<DocumentSnapshot>(
