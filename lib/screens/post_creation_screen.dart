@@ -10,6 +10,7 @@ import 'package:reem_verse_rebuild/screens/landing_screen.dart';
 import 'package:reem_verse_rebuild/screens/notification_screen.dart';
 import 'package:reem_verse_rebuild/screens/chat_list_screen.dart';
 import 'package:reem_verse_rebuild/screens/search_screen.dart';
+import 'package:reem_verse_rebuild/screens/login_screen.dart';
 
 class PostCreationScreen extends StatefulWidget {
   const PostCreationScreen({super.key});
@@ -74,7 +75,9 @@ final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.isAnonymous) {
       _showSnack("You must be logged in to create a post.");
       Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       });
       return;
     }

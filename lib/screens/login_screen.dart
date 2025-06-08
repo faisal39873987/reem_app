@@ -8,6 +8,7 @@ import 'package:reem_verse_rebuild/screens/landing_screen.dart';
 import 'package:reem_verse_rebuild/screens/social_login_screen.dart';
 import 'package:reem_verse_rebuild/screens/auth/signup_screen.dart';
 import 'package:reem_verse_rebuild/screens/auth/email_input_screen.dart';
+import 'package:reem_verse_rebuild/screens/onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -99,7 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
             child: const Icon(Icons.arrow_forward_ios, color: Color(0xFF1C93D6)),
           ),
           onPressed: () {
-            Navigator.of(context).pushReplacementNamed('/onboarding');
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+            );
           },
         ),
         title: const Text(""),

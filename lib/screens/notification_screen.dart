@@ -6,6 +6,7 @@ import 'chat_list_screen.dart';
 import 'search_screen.dart';
 import 'post_creation_screen.dart';
 import 'landing_screen.dart';
+import 'login_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -78,7 +79,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     if (user == null || user.isAnonymous) {
       Future.microtask(() {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
