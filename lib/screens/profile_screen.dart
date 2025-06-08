@@ -40,8 +40,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       final data = doc.data();
 
-      if (mounted) {
-        setState(() {
+      if (!mounted) return;
+      setState(() {
           _userName = data?['name'] ?? 'User';
           _bioController.text = data?['bio'] ?? '';
           _phoneController.text = data?['phone'] ?? '';
@@ -52,7 +52,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
     }
   }
 
@@ -80,28 +81,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'showInReemYouth': _showInReemYouth,
       }, SetOptions(merge: true));
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("✅ Profile updated")),
         );
-        setState(() {
-          _imageUrl = newImageUrl;
-          _profileImage = null;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _imageUrl = newImageUrl;
+        _profileImage = null;
+        _isLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("❌ Failed to update profile")),
         );
-      }
     }
   }
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (!mounted) return;
     if (picked != null) {
       setState(() => _profileImage = File(picked.path));
     }

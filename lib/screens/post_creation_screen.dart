@@ -53,6 +53,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
     }
 
     final position = await Geolocator.getCurrentPosition();
+    if (!mounted) return;
     setState(() {
       _latitude = position.latitude;
       _longitude = position.longitude;
@@ -61,6 +62,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
 
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (!mounted) return;
     if (pickedFile != null) {
       setState(() => _imageFile = File(pickedFile.path));
     }
@@ -136,6 +138,7 @@ final user = FirebaseAuth.instance.currentUser;
       print("❌ Upload Error: $e");
       _showSnack("❌ Something went wrong. Try again.");
     } finally {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
