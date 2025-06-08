@@ -15,10 +15,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const LandingScreen()),
-          );
+          Navigator.pushReplacementNamed(context, '/landing');
         }
       });
     });

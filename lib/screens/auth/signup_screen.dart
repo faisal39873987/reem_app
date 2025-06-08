@@ -46,9 +46,7 @@ class _SignupScreenState extends State<SignupScreen> {
         'createdAt': Timestamp.now(),
       });
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-      );
+      Navigator.of(context).pushReplacementNamed('/welcome');
     } on FirebaseAuthException catch (e) {
       String message = "Signup failed.";
       if (e.code == 'email-already-in-use') message = "Email is already registered.";

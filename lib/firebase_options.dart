@@ -37,7 +37,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '342300879153',
     projectId: 'reemverse-prod-24',
     authDomain: 'reemverse-prod-24.firebaseapp.com',
-    storageBucket: 'reemverse-prod-24.firebasestorage.app',
+    storageBucket: 'reemverse-prod-24.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -45,7 +45,7 @@ class DefaultFirebaseOptions {
     appId: '1:342300879153:android:c5f2f97ab30a2ab35ee810',
     messagingSenderId: '342300879153',
     projectId: 'reemverse-prod-24',
-    storageBucket: 'reemverse-prod-24.firebasestorage.app',
+    storageBucket: 'reemverse-prod-24.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
     appId: '1:342300879153:ios:52a682d1c70692665ee810',
     messagingSenderId: '342300879153',
     projectId: 'reemverse-prod-24',
-    storageBucket: 'reemverse-prod-24.firebasestorage.app',
+    storageBucket: 'reemverse-prod-24.appspot.com',
     iosClientId: '342300879153-b1ujv61c6jq8c7bbf89r59impirbjb05.apps.googleusercontent.com',
     iosBundleId: 'com.example.reemVerseRebuild',
   );
@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     appId: '1:342300879153:ios:52a682d1c70692665ee810',
     messagingSenderId: '342300879153',
     projectId: 'reemverse-prod-24',
-    storageBucket: 'reemverse-prod-24.firebasestorage.app',
+    storageBucket: 'reemverse-prod-24.appspot.com',
     iosClientId: '342300879153-b1ujv61c6jq8c7bbf89r59impirbjb05.apps.googleusercontent.com',
     iosBundleId: 'com.example.reemVerseRebuild',
   );
@@ -74,7 +74,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '342300879153',
     projectId: 'reemverse-prod-24',
     authDomain: 'reemverse-prod-24.firebaseapp.com',
-    storageBucket: 'reemverse-prod-24.firebasestorage.app',
+    storageBucket: 'reemverse-prod-24.appspot.com',
   );
 
 }
