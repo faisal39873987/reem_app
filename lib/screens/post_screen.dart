@@ -10,6 +10,7 @@ import 'landing_screen.dart';
 import 'marketplace_screen.dart';
 import 'profile_screen.dart';
 import 'menu_screen.dart';
+import 'login_screen.dart';
 import '../services/location_service.dart';
 
 class PostScreen extends StatefulWidget {
@@ -65,7 +66,9 @@ class _PostScreenState extends State<PostScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).pushReplacementNamed('/login');
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
               },
               child: const Text("Login"),
             ),
@@ -218,16 +221,18 @@ class _PostScreenState extends State<PostScreen> {
               IconButton(
                 icon: const Icon(Icons.home, color: blueColor),
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const LandingScreen()),
-                  );
+                  Navigator.of(context).pushReplacementNamed('/landing');
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.store, color: blueColor),
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const MarketplaceScreen()),
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const MarketplaceScreen(),
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
+                    ),
                   );
                 },
               ),
@@ -235,17 +240,13 @@ class _PostScreenState extends State<PostScreen> {
               IconButton(
                 icon: const Icon(Icons.person, color: blueColor),
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                  );
+                  Navigator.of(context).pushReplacementNamed('/profile');
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.menu, color: blueColor),
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const MainMenuScreen()),
-                  );
+                  Navigator.of(context).pushReplacementNamed('/menu');
                 },
               ),
             ],

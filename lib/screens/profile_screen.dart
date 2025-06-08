@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isOwner;
@@ -40,19 +41,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       final data = doc.data();
 
-      if (mounted) {
-        setState(() {
-          _userName = data?['name'] ?? 'User';
-          _bioController.text = data?['bio'] ?? '';
-          _phoneController.text = data?['phone'] ?? '';
-          _noteController.text = data?['note'] ?? '';
-          _imageUrl = data?['imageUrl'] ?? '';
-          _showInReemYouth = data?['showInReemYouth'] ?? true;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _userName = data?['name'] ?? 'User';
+        _bioController.text = data?['bio'] ?? '';
+        _phoneController.text = data?['phone'] ?? '';
+        _noteController.text = data?['note'] ?? '';
+        _imageUrl = data?['imageUrl'] ?? '';
+        _showInReemYouth = data?['showInReemYouth'] ?? true;
+        _isLoading = false;
+      });
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
     }
   }
 
@@ -66,8 +67,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       String newImageUrl = _imageUrl;
 
       if (_profileImage != null) {
-        final ref = FirebaseStorage.instance.ref().child('user_images/${user.uid}.jpg');
-        await ref.putFile(_profileImage!).timeout(const Duration(seconds: 20));
+        final filePath = 'user_images/${user.uid}.jpg';
+        final ref = FirebaseStorage.instance.ref().child(filePath);
+        await ref.putFile(_profileImage!);
         newImageUrl = await ref.getDownloadURL();
       }
 
@@ -80,28 +82,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'showInReemYouth': _showInReemYouth,
       }, SetOptions(merge: true));
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Profile updated")),
-        );
-        setState(() {
-          _imageUrl = newImageUrl;
-          _profileImage = null;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("✅ Profile updated")),
+      );
+      setState(() {
+        _imageUrl = newImageUrl;
+        _profileImage = null;
+        _isLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("❌ Failed to update profile")),
-        );
-      }
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ Failed to update profile")),
+      );
     }
   }
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (!mounted) return;
     if (picked != null) {
       setState(() => _profileImage = File(picked.path));
     }
@@ -115,7 +116,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (_imageUrl.isNotEmpty) {
       imageProvider = NetworkImage(_imageUrl);
     } else {
-    imageProvider = NetworkImage('https://ui-avatars.com/api/?name=${Uri.encodeComponent(_userName)}&background=0D8ABC&color=fff');
+      imageProvider = NetworkImage(
+        'https://ui-avatars.com/api/?name=${Uri.encodeComponent(_userName)}&background=0D8ABC&color=fff',
+      );
     }
 
     return CircleAvatar(
@@ -132,7 +135,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (user == null || user.isAnonymous) {
       Future.microtask(() {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }

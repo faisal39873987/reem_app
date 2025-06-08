@@ -122,10 +122,12 @@ class MainMenuScreen extends StatelessWidget {
                       await prefs.setBool('isLoggedIn', false);
 
                       if (!context.mounted) return;
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/login',
                         (route) => false,
                       );
+                      Navigator.of(context)
+                          .pushNamedAndRemoveUntil('/login', (route) => false);
                     },
                   ),
                 ),

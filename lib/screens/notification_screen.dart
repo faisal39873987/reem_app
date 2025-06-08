@@ -6,6 +6,7 @@ import 'chat_list_screen.dart';
 import 'search_screen.dart';
 import 'post_creation_screen.dart';
 import 'landing_screen.dart';
+import 'login_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -35,6 +36,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         .where('read', isEqualTo: false)
         .snapshots()
         .listen((snapshot) {
+      if (!mounted) return;
       setState(() {
         unreadCount = snapshot.docs.length;
       });
@@ -77,7 +79,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     if (user == null || user.isAnonymous) {
       Future.microtask(() {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -136,7 +140,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
                     return const Center(child: Text("No notifications yet."));
                   }
 

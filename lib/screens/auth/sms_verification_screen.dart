@@ -41,9 +41,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LandingScreen()),
-      );
+      Navigator.of(context).pushReplacementNamed('/landing');
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Verification failed: ${e.message}")),
