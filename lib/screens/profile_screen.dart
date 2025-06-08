@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isOwner;
@@ -132,7 +133,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (user == null || user.isAnonymous) {
       Future.microtask(() {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
