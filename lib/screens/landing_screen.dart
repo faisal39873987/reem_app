@@ -331,7 +331,13 @@ class _HomePageContentState extends State<HomePageContent> {
                                       leading: CircleAvatar(
                                         backgroundImage: userImage.isNotEmpty
                                             ? NetworkImage(userImage)
-                                            : const AssetImage('assets/images/default_user.png')
+leading: CircleAvatar(
+  backgroundImage: userImage.isNotEmpty
+      ? NetworkImage(userImage)
+      : const AssetImage('assets/images/default_user.png') as ImageProvider,
+  radius: 20,
+),
+
                                                 as ImageProvider,
                                         radius: 20,
                                       ),

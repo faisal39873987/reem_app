@@ -5,6 +5,8 @@ import 'firebase_options.dart';
 
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/auth/phone_input_screen.dart';
 import 'screens/auth/sms_verification_screen.dart';
@@ -12,12 +14,15 @@ import 'screens/auth/reset_password_screen.dart';
 import 'screens/landing_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/chat_list_screen.dart';
+import 'screens/chat_screen.dart';
 import 'screens/notification_screen.dart';
 import 'screens/marketplace_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/post_creation_screen.dart';
 import 'screens/post_details_screen.dart';
 import 'screens/search_screen.dart';
+
+import 'providers/locale_provider.dart';
 import 'providers/locale_provider.dart';
 
 void main() async {
@@ -39,24 +44,32 @@ class MyApp extends StatelessWidget {
             title: 'Reem Verse',
             debugShowCheckedModeBanner: false,
             theme: ThemeData(primarySwatch: Colors.blue),
-            // اللغة الآن غير مدعومة، فنبقي locale فقط لو تستخدمها بطريقة مخصصة
             locale: provider.locale,
-            home: const SplashScreen(),
-            routes: {
-              '/login': (_) => const LoginScreen(),
-              '/signup': (_) => const SignupScreen(),
-              '/phone': (_) => const PhoneInputScreen(),
-              '/verify': (_) => const SmsVerificationScreen(),
-              '/reset': (_) => const ResetPasswordScreen(),
-              '/landing': (_) => const LandingScreen(),
-              '/profile': (_) => const ProfileScreen(),
-              '/chat': (_) => const ChatListScreen(),
-              '/notifications': (_) => const NotificationScreen(),
-              '/marketplace': (_) => const MarketplaceScreen(),
-              '/menu': (_) => const MainMenuScreen(),
-              '/post': (_) => const PostCreationScreen(),
-              '/postDetails': (_) => const PostDetailsScreen(),
-              '/search': (_) => const SearchScreen(),
+return MaterialApp(
+  title: 'Reem Verse',
+  debugShowCheckedModeBanner: false,
+  theme: ThemeData(primarySwatch: Colors.blue),
+  locale: provider.locale,
+  home: const SplashScreen(),
+  routes: {
+    '/login': (_) => const LoginScreen(),
+    '/signup': (_) => const SignupScreen(),
+    '/phone': (_) => const PhoneInputScreen(),
+    '/verify': (_) => const SmsVerificationScreen(),
+    '/reset': (_) => const ResetPasswordScreen(),
+    '/landing': (_) => const LandingScreen(),
+    '/profile': (_) => const ProfileScreen(),
+    '/chat': (_) => const ChatListScreen(),
+    '/chat-screen': (_) => const ChatScreen(),
+    '/notifications': (_) => const NotificationScreen(),
+    '/marketplace': (_) => const MarketplaceScreen(),
+    '/menu': (_) => const MainMenuScreen(),
+    '/post': (_) => const PostCreationScreen(),
+    '/postDetails': (_) => const PostDetailsScreen(),
+    '/search': (_) => const SearchScreen(),
+  },
+);
+
             },
           );
         },

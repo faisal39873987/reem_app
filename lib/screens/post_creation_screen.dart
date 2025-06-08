@@ -131,11 +131,7 @@ final user = FirebaseAuth.instance.currentUser;
 
       _showSnack("✅ Post created successfully!");
       Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => const LandingScreen(initialIndex: 0),
-          ),
-        );
+        Navigator.of(context).pushReplacementNamed('/landing');
       });
     } catch (e) {
       print("❌ Upload Error: $e");

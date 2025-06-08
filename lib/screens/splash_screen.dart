@@ -27,20 +27,19 @@ class _SplashScreenState extends State<SplashScreen> {
     final isFirstTime = prefs.getBool('isFirstTime') ?? true;
     final user = FirebaseAuth.instance.currentUser;
 
-    if (!mounted) return;
-    if (user != null) {
-      Navigator.of(context).pushReplacementNamed('/landing');
-    } else if (isFirstTime) {
 if (!mounted) return;
 
+String targetRoute;
 if (user != null) {
-  Navigator.of(context).pushReplacementNamed('/landing');
+  targetRoute = '/landing';
+} else if (isFirstTime) {
+  targetRoute = '/onboarding';
 } else {
-  Widget targetScreen;
-  if (isFirstTime) {
-    targetScreen = const OnboardingScreen();
-  } else {
-    targetScreen = const LoginScreen();
+  targetRoute = '/login';
+}
+
+Navigator.of(context).pushReplacementNamed(targetRoute);
+
   }
 
   Navigator.of(context).pushReplacement(
