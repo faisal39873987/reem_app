@@ -43,6 +43,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   Future<void> _fetchLocation() async {
     final pos = await LocationService.getCurrentLocation();
+    if (!mounted) return;
     setState(() => _userLocation = pos);
   }
 
@@ -168,7 +169,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     return const Center(child: Text("Error loading posts."));
                   }
 
-                  if (!snapshot.hasData) {
+                  if (!snapshot.hasData || snapshot.data == null) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
@@ -271,6 +272,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               FutureBuilder<DocumentSnapshot>(
                                 future: FirebaseFirestore.instance.collection('users').doc(creatorId).get(),
                                 builder: (context, userSnapshot) {
+                                  if (!userSnapshot.hasData || userSnapshot.data == null) return SizedBox.shrink();
                                   final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
 
                                   final userName = userData?['name'] ?? 'User';
@@ -306,6 +308,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                             ),
                                           ),
                                         );
+                                          if (!mounted) return;
 
                                         setState(() => _isNavigating = false);
                                       },

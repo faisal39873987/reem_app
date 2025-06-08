@@ -36,11 +36,10 @@ class _SplashScreenState extends State<SplashScreen> {
       targetScreen = const LoginScreen();
     }
 
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => targetScreen),
-      );
-    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => targetScreen),
+    );
   }
 
   @override

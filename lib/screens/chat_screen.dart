@@ -102,6 +102,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 stream: _chatRef.collection('typing').doc(widget.receiverId).snapshots(),
                 builder: (context, snapshot) {
                   final isTyping = snapshot.data?.get('typing') == true;
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const SizedBox.shrink();
+                  }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -125,7 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _messagesRef.orderBy('timestamp', descending: false).snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData || snapshot.data == null) return const Center(child: CircularProgressIndicator());
 
                 final messages = snapshot.data!.docs;
                 if (messages.isEmpty) return const Center(child: Text('No messages yet.'));
