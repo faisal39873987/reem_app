@@ -115,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (_imageUrl.isNotEmpty) {
       imageProvider = NetworkImage(_imageUrl);
     } else {
-      imageProvider = const AssetImage('assets/images/default_user.png');
+    imageProvider = NetworkImage('https://ui-avatars.com/api/?name=${Uri.encodeComponent(_userName)}&background=0D8ABC&color=fff');
     }
 
     return CircleAvatar(

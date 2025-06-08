@@ -44,7 +44,7 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/images/default_user.png
+    - assets/images/
     - assets/videos/
     - assets/audios/
     - assets/fonts/
