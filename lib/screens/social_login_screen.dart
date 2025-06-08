@@ -63,9 +63,7 @@ class _SocialLoginScreenState extends State<SocialLoginScreen> {
   }
 
   void _navigateToLanding() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LandingScreen()),
-    );
+    Navigator.of(context).pushReplacementNamed('/landing');
   }
 
   void _showError(String message) {
