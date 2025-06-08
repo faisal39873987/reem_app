@@ -81,8 +81,15 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       body: FutureBuilder<DocumentSnapshot>(
         future: _postRef.get(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          if (!snapshot.data!.exists) return const Center(child: Text("Post not found."));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error loading post."));
+          }
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return const Center(child: Text("Post not found."));
+          }
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final imageUrl = data['imageUrl'] ?? '';
