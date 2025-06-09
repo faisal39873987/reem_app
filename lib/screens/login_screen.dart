@@ -6,6 +6,7 @@ import 'package:reem_verse_rebuild/screens/auth/signup_screen.dart';
 import 'package:reem_verse_rebuild/screens/auth/email_input_screen.dart';
 import 'package:reem_verse_rebuild/screens/onboarding_screen.dart';
 import '../utils/constants.dart';
+import '../services/notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -71,6 +72,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await prefs.remove('savedEmail');
       }
 
+      await NotificationService.initialize();
+
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/landing');
     } on FirebaseAuthException catch (e) {
@@ -133,6 +136,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       final cred = PhoneAuthProvider.credential(
           verificationId: _verificationId!, smsCode: code);
       await _auth.signInWithCredential(cred);
+      await NotificationService.initialize();
       Navigator.of(context).pushReplacementNamed('/landing');
     } catch (e) {
       ScaffoldMessenger.of(context)

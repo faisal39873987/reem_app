@@ -20,13 +20,14 @@ dependencies:
   shared_preferences: ^2.2.2
 
   # Firebase
+
   firebase_core: ^2.25.4
   firebase_auth: ^4.17.4
   cloud_firestore: ^4.15.4
   firebase_storage: ^11.6.7
   firebase_messaging: ^14.7.6
   firebase_analytics: ^10.6.3
-  firebase_crashlytics: ^3.5.6
+
 
   # Media & Location
   just_audio: ^0.10.2
