@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'firebase_options.dart';
 import 'services/notification_service.dart';
 import 'dart:ui';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-}
 
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -32,17 +28,34 @@ import 'screens/search_screen.dart';
 
 import 'providers/locale_provider.dart';
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseCrashlytics.instance.log('bg message: \${message.messageId ?? "no-id"}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Firebase Crashlytics setup
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+
+  // Firebase Messaging setup
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await FirebaseMessaging.instance.requestPermission();
+
+  // Firebase Analytics (if needed)
+  FirebaseAnalytics.instance;
+
+  // Local Notification setup
   await NotificationService.initialize();
+
   runApp(const MyApp());
 }
 
@@ -81,3 +94,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
