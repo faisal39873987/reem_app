@@ -4,6 +4,7 @@ import 'notification_screen.dart';
 import 'chat_list_screen.dart';
 import 'post_creation_screen.dart';
 import 'landing_screen.dart';
+import '../utils/constants.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -44,7 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,

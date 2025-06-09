@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'post_creation_screen.dart';
 import 'landing_screen.dart';
 import 'login_screen.dart';
+import '../utils/constants.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -72,7 +73,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const blue = Color(0xFF1877F2);
+    const blue = kPrimaryColor;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null || user.isAnonymous) {

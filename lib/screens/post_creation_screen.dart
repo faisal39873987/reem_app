@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import '../utils/constants.dart';
 
 import 'package:reem_verse_rebuild/screens/notification_screen.dart';
 import 'package:reem_verse_rebuild/screens/chat_list_screen.dart';
@@ -143,7 +144,7 @@ final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(

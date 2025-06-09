@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
 if (!mounted) return;
 
 String targetRoute;
-if (user != null) {
+if (user != null && user.emailVerified) {
   targetRoute = '/landing';
 } else if (isFirstTime) {
   targetRoute = '/onboarding';

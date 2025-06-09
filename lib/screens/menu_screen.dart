@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/constants.dart';
 
 import 'notification_screen.dart';
 import 'chat_list_screen.dart';
@@ -14,7 +15,7 @@ class MainMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,

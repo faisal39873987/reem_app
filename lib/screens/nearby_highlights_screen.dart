@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 import 'chat_screen.dart';
 import 'post_details_screen.dart';
+import '../utils/constants.dart';
 
 class NearbyHighlightsScreen extends StatefulWidget {
   const NearbyHighlightsScreen({super.key});
@@ -95,7 +96,7 @@ class _NearbyHighlightsScreenState extends State<NearbyHighlightsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,

@@ -1,6 +1,7 @@
 // lib/screens/auth/sms_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../utils/constants.dart';
 
 class SmsVerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -94,7 +95,7 @@ class _SmsVerificationScreenState extends State<SmsVerificationScreen> {
                   : ElevatedButton(
                       onPressed: _verifyCode,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1C93D6),
+                        backgroundColor: const kPrimaryColor,
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

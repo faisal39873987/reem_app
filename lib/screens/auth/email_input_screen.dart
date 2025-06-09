@@ -1,6 +1,7 @@
 // lib/screens/auth/email_input_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../utils/constants.dart';
 
 class EmailInputScreen extends StatelessWidget {
   const EmailInputScreen({super.key});
@@ -59,7 +60,7 @@ class EmailInputScreen extends StatelessWidget {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1C93D6),
+                  backgroundColor: const kPrimaryColor,
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text("Send Recovery Email"),

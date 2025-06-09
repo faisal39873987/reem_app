@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../login_screen.dart';
+import '../../utils/constants.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {

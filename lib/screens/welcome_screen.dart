@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -23,9 +24,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C93D6),
+      backgroundColor: const kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1C93D6),
+        backgroundColor: const kPrimaryColor,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),

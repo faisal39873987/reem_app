@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'chat_screen.dart';
+import '../utils/constants.dart';
 
 class PostDetailsScreen extends StatefulWidget {
   final String postId;
@@ -71,9 +72,24 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
     _commentController.clear();
   }
 
+  Future<void> _addReply(String commentId, String text) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (text.isEmpty || user == null) return;
+
+    await _commentsRef
+        .doc(commentId)
+        .collection('replies')
+        .add({
+      'userId': user.uid,
+      'userName': user.displayName ?? 'User',
+      'text': text,
+      'timestamp': Timestamp.now(),
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    const blue = Color(0xFF1877F2);
+    const blue = kPrimaryColor;
 
     return Scaffold(
       appBar: AppBar(
@@ -153,7 +169,7 @@ if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
                         final userData = userDoc.data();
 
                         final receiverName = userData?['name'] ?? 'User';
-                        final receiverImage = userData?['imageUrl'] ?? '';
+                        final receiverImage = userData?['photoUrl'] ?? '';
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -221,15 +237,94 @@ if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
                       separatorBuilder: (_, __) => const Divider(),
                       itemCount: comments.length,
                       itemBuilder: (context, index) {
-                        final comment = comments[index].data() as Map<String, dynamic>;
+                        final commentDoc = comments[index];
+                        final comment = commentDoc.data() as Map<String, dynamic>;
+                        final commentId = commentDoc.id;
                         final text = comment['text'] ?? '';
                         final userName = comment['userName'] ?? 'User';
                         final time = (comment['timestamp'] as Timestamp?)?.toDate();
                         final timeText = time != null ? DateFormat('hh:mm a').format(time) : '';
-                        return ListTile(
-                          title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(text),
-                          trailing: Text(timeText, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text(text),
+                              trailing: Text(timeText, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                            ),
+                            StreamBuilder<QuerySnapshot>(
+                              stream: _commentsRef
+                                  .doc(commentId)
+                                  .collection('replies')
+                                  .orderBy('timestamp')
+                                  .snapshots(),
+                              builder: (context, replySnap) {
+                                if (!replySnap.hasData || replySnap.data == null) {
+                                  return const SizedBox.shrink();
+                                }
+                                final replies = replySnap.data!.docs;
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: replies.length,
+                                  itemBuilder: (context, idx) {
+                                    final reply = replies[idx].data() as Map<String, dynamic>;
+                                    final rText = reply['text'] ?? '';
+                                    final rUser = reply['userName'] ?? 'User';
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 32, bottom: 4),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.subdirectory_arrow_right, size: 16, color: Colors.grey),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text.rich(
+                                              TextSpan(
+                                                children: [
+                                                  TextSpan(text: '$rUser: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                  TextSpan(text: rText),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
+                                onPressed: () async {
+                                  final controller = TextEditingController();
+                                  final replyText = await showDialog<String>(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text('Reply'),
+                                      content: TextField(
+                                        controller: controller,
+                                        decoration: const InputDecoration(labelText: 'Write a reply'),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context, controller.text.trim()),
+                                          child: const Text('Send'),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                  if (replyText != null && replyText.isNotEmpty) {
+                                    _addReply(commentId, replyText);
+                                  }
+                                },
+                                child: const Text('Reply'),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     );
