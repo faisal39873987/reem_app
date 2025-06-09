@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/constants.dart';
 
 class IntroOverlay extends StatefulWidget {
   final List<GlobalKey> animatedKeys;
@@ -55,7 +56,7 @@ class _IntroOverlayState extends State<IntroOverlay> {
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blueAccent, width: 4),
+                border: Border.all(color: kPrimaryColor, width: 4),
               ),
             ),
           ),
@@ -71,7 +72,7 @@ class _IntroOverlayState extends State<IntroOverlay> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade600,
+                  color: kPrimaryColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
@@ -88,7 +89,7 @@ class _IntroOverlayState extends State<IntroOverlay> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue,
+                        foregroundColor: kPrimaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

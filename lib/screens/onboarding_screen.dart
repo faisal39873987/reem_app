@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/constants.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -86,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: _currentPage == index ? 12 : 8,
                   height: _currentPage == index ? 12 : 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index ? Colors.blue : Colors.grey,
+                    color: _currentPage == index ? kPrimaryColor : Colors.grey,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -97,7 +98,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _nextPage,
-        backgroundColor: Colors.blue,
+        backgroundColor: kPrimaryColor,
         child: const Icon(Icons.arrow_forward_ios),
       ),
     );

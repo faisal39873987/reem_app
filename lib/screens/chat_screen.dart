@@ -33,7 +33,27 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
     _messagesRef = _chatRef.collection('messages');
+    _ensureParticipation();
     _setSeen();
+  }
+
+  Future<void> _ensureParticipation() async {
+    if (_uid == null) return;
+    final doc = await _chatRef.get();
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    final participants = List<String>.from(data['participants'] ?? []);
+    bool updated = false;
+    if (!participants.contains(_uid)) {
+      participants.add(_uid!);
+      updated = true;
+    }
+    if (!participants.contains(widget.receiverId)) {
+      participants.add(widget.receiverId);
+      updated = true;
+    }
+    if (updated || !doc.exists) {
+      await _chatRef.set({'participants': participants}, SetOptions(merge: true));
+    }
   }
 
   void _setTyping(bool typing) {
@@ -209,7 +229,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                   margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: isMe ? Colors.blue[100] : Colors.grey[200],
+                                    color: isMe
+                                        ? kPrimaryColor.withOpacity(0.2)
+                                        : Colors.grey[200],
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Column(
@@ -245,7 +267,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                               if (isMe && isSeen) ...[
                                                 const SizedBox(width: 6),
                                                 const Icon(Icons.done_all,
-                                                    size: 14, color: Colors.blue),
+                                                    size: 14, color: kPrimaryColor),
                                               ],
                                             ],
                                           ),
