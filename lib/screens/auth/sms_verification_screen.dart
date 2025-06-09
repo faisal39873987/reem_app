@@ -1,7 +1,6 @@
 // lib/screens/auth/sms_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../landing_screen.dart';
 
 class SmsVerificationScreen extends StatefulWidget {
   final String phoneNumber;

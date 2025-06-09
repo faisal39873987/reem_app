@@ -6,7 +6,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:reem_verse_rebuild/screens/landing_screen.dart';
 import 'package:reem_verse_rebuild/screens/notification_screen.dart';
 import 'package:reem_verse_rebuild/screens/chat_list_screen.dart';
 import 'package:reem_verse_rebuild/screens/search_screen.dart';

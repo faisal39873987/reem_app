@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../providers/locale_provider.dart';
 import '../services/location_service.dart';
 import 'chat_list_screen.dart';
-import 'post_creation_screen.dart';
 import 'notification_screen.dart';
 import 'search_screen.dart';
-import 'nearby_highlights_screen.dart';
 import 'post_details_screen.dart';
 import 'chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -210,8 +206,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       final imageUrl = data['imageUrl'] ?? '';
                       final description = data['description'] ?? '';
                       final price = data['price']?.toString() ?? '0';
-                      final location = data['location'];
-                      final creatorId = data['creatorId'] ?? '';
+                        final creatorId = data['creatorId'] ?? '';
                       final distance = _calculateDistance(data);
 
                       return GestureDetector(
