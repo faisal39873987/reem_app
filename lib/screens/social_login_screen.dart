@@ -4,6 +4,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:io' show Platform;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/notification_service.dart';
 
 class SocialLoginScreen extends StatefulWidget {
   const SocialLoginScreen({super.key});
@@ -24,6 +25,7 @@ class _SocialLoginScreenState extends State<SocialLoginScreen> {
         final OAuthCredential facebookAuthCredential =
             FacebookAuthProvider.credential(result.accessToken!.tokenString);
         await _auth.signInWithCredential(facebookAuthCredential);
+        await NotificationService.initialize();
         await _setLoginFlags();
         _navigateToLanding();
       } else {
@@ -49,6 +51,7 @@ class _SocialLoginScreenState extends State<SocialLoginScreen> {
       );
 
       await _auth.signInWithCredential(oauthCredential);
+      await NotificationService.initialize();
       await _setLoginFlags();
       _navigateToLanding();
     } catch (e) {
