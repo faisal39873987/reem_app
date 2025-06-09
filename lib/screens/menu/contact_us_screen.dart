@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../utils/constants.dart';
 
 class ContactUsScreen extends StatelessWidget {
   const ContactUsScreen({super.key});
@@ -43,7 +44,7 @@ class ContactUsScreen extends StatelessWidget {
             Center(
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: kPrimaryColor,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 onPressed: _launchEmail,

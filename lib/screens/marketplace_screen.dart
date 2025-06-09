@@ -81,7 +81,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   setState(() => _onlyNearby = val);
                   Navigator.pop(context);
                 },
-                activeColor: Colors.blue,
+                activeColor: kPrimaryColor,
                 title: const Text("Show nearby posts only (10km)"),
               ),
               const SizedBox(height: 10),
