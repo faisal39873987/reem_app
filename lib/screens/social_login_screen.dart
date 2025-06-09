@@ -37,28 +37,6 @@ class _SocialLoginScreenState extends State<SocialLoginScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
-    try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return;
-      }
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      await _auth.signInWithCredential(credential);
-      await _setLoginFlags();
-      _navigateToLanding();
-    } catch (e) {
-      _showError("Google Sign-In error: $e");
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
 
   Future<void> _signInWithApple() async {
     try {
@@ -132,13 +110,6 @@ class _SocialLoginScreenState extends State<SocialLoginScreen> {
                             onPressed: _signInWithFacebook,
                             icon: Image.asset('assets/images/facebook_icon.png', height: 24),
                             label: const Text("Continue with Facebook"),
-                            style: _buttonStyle(),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: _signInWithGoogle,
-                            icon: Image.asset('assets/images/google_icon.png', height: 24),
-                            label: const Text("Continue with Google"),
                             style: _buttonStyle(),
                           ),
                           const SizedBox(height: 12),
