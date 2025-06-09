@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 
 // 🔵 ألوان المشروع الرسمية
-const Color kPrimaryColor = Color(0xFF1877F2); // الأزرق الريمي
-const Color kSecondaryColor = Color(0xFF1C93D6);
+const Color kPrimaryColor = Color(0xFF007AFF); // unified blue
+const Color kSecondaryColor = Colors.white;
 const Color kAccentColor = Color(0xFF00C6FF);
 const Color kTextDark = Color(0xFF222222);
 const Color kTextLight = Color(0xFF888888);

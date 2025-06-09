@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'login_screen.dart';
+import '../utils/constants.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isOwner;
@@ -23,7 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _userName = '';
   File? _profileImage;
-  String _imageUrl = '';
+  String _photoUrl = '';
   bool _isLoading = true;
   bool _showInReemYouth = true;
 
@@ -47,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _bioController.text = data?['bio'] ?? '';
         _phoneController.text = data?['phone'] ?? '';
         _noteController.text = data?['note'] ?? '';
-        _imageUrl = data?['imageUrl'] ?? '';
+        _photoUrl = data?['photoUrl'] ?? '';
         _showInReemYouth = data?['showInReemYouth'] ?? true;
         _isLoading = false;
       });
@@ -64,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      String newImageUrl = _imageUrl;
+      String newImageUrl = _photoUrl;
 
       if (_profileImage != null) {
         final filePath = 'user_images/${user.uid}.jpg';
@@ -78,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'bio': _bioController.text.trim(),
         'phone': _phoneController.text.trim(),
         'note': _noteController.text.trim(),
-        'imageUrl': newImageUrl,
+        'photoUrl': newImageUrl,
         'showInReemYouth': _showInReemYouth,
       }, SetOptions(merge: true));
 
@@ -87,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text("✅ Profile updated")),
       );
       setState(() {
-        _imageUrl = newImageUrl;
+        _photoUrl = newImageUrl;
         _profileImage = null;
         _isLoading = false;
       });
@@ -113,8 +114,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (_profileImage != null) {
       imageProvider = FileImage(_profileImage!);
-    } else if (_imageUrl.isNotEmpty) {
-      imageProvider = NetworkImage(_imageUrl);
+    } else if (_photoUrl.isNotEmpty) {
+      imageProvider = NetworkImage(_photoUrl);
     } else {
       imageProvider = NetworkImage(
         'https://ui-avatars.com/api/?name=${Uri.encodeComponent(_userName)}&background=0D8ABC&color=fff',
@@ -142,7 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    const blue = Color(0xFF1877F2);
+    const blue = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -171,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildAvatar(),
                       if (isOwner)
                         IconButton(
-                          icon: const Icon(Icons.camera_alt, color: Colors.blue),
+                          icon: const Icon(Icons.camera_alt, color: kPrimaryColor),
                           onPressed: _pickImage,
                         )
                     ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_details_screen.dart';
+import '../utils/constants.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,7 +11,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('الريم فيرس 🏴‍☠️'),
-        backgroundColor: const Color(0xFF1877F2),
+        backgroundColor: const kPrimaryColor,
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(

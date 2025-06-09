@@ -8,6 +8,7 @@ import 'search_screen.dart';
 import 'post_creation_screen.dart';
 import 'marketplace_screen.dart';
 import 'login_screen.dart';
+import '../utils/constants.dart';
 import '../services/location_service.dart';
 
 class PostScreen extends StatefulWidget {
@@ -83,7 +84,7 @@ class _PostScreenState extends State<PostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,

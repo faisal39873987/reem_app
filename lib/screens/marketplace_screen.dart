@@ -8,6 +8,7 @@ import 'search_screen.dart';
 import 'post_details_screen.dart';
 import 'chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/constants.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   const MarketplaceScreen({super.key});
@@ -109,7 +110,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -271,7 +272,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                                   final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
 
                                   final userName = userData?['name'] ?? 'User';
-                                  final userImage = userData?['imageUrl'] ?? '';
+                                  final userImage = userData?['photoUrl'] ?? '';
                                   final currentUser = FirebaseAuth.instance.currentUser;
 
                                   return Align(

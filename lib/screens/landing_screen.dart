@@ -15,6 +15,7 @@ import '../screens/nearby_highlights_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/post_details_screen.dart';
 import '../widgets/intro_overlay.dart';
+import '../utils/constants.dart';
 
 class LandingScreen extends StatefulWidget {
   final int initialIndex;
@@ -83,7 +84,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -122,7 +123,7 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildNavItem(IconData icon, String label, int index, {Key? key}) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
     return GestureDetector(
       key: key,
       onTap: () => _onItemTapped(index),
@@ -209,7 +210,7 @@ class _HomePageContentState extends State<HomePageContent> {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF1877F2);
+    const blueColor = kPrimaryColor;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +304,7 @@ class _HomePageContentState extends State<HomePageContent> {
                         final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
 
                         final userName = userData?['name'] ?? 'User';
-                        final userImage = userData?['imageUrl'] ?? '';
+                        final userImage = userData?['photoUrl'] ?? '';
 
                         return Column(
                           children: [
@@ -369,7 +370,7 @@ class _HomePageContentState extends State<HomePageContent> {
                                                 ),
                                                 child: Text(
                                                   category,
-                                                  style: const TextStyle(fontSize: 12, color: Color(0xFF1877F2)),
+                                                  style: const TextStyle(fontSize: 12, color: kPrimaryColor),
                                                 ),
                                               ),
                                               const Spacer(),

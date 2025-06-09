@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/constants.dart';
 import 'chat_screen.dart';
 
 class ChatListScreen extends StatelessWidget {
@@ -16,9 +17,9 @@ class ChatListScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 1,
-          iconTheme: const IconThemeData(color: Color(0xFF1877F2)),
+          iconTheme: const IconThemeData(color: kPrimaryColor),
           title: const Text('Chats', style: TextStyle(
-            color: Color(0xFF1877F2),
+            color: kPrimaryColor,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           )),
@@ -34,9 +35,9 @@ class ChatListScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        iconTheme: const IconThemeData(color: Color(0xFF1877F2)),
+        iconTheme: const IconThemeData(color: kPrimaryColor),
         title: const Text('My Chats', style: TextStyle(
-          color: Color(0xFF1877F2),
+          color: kPrimaryColor,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         )),
@@ -65,8 +66,11 @@ class ChatListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final chat = chats[index];
               final data = chat.data() as Map<String, dynamic>;
-              final users = List<String>.from(data['participants']);
-              final otherUserId = users.firstWhere((id) => id != uid);
+              final participants = data['participants'];
+              if (participants is! List) return const SizedBox.shrink();
+              final users = List<String>.from(participants);
+              if (!users.contains(uid)) return const SizedBox.shrink();
+              final otherUserId = users.firstWhere((id) => id != uid, orElse: () => uid!);
 
               return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
@@ -80,7 +84,7 @@ class ChatListScreen extends StatelessWidget {
 
                   final userData = userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
                   final displayName = userData['name'] ?? 'User';
-                  final photoUrl = userData['imageUrl'] ?? '';
+                  final photoUrl = userData['photoUrl'] ?? '';
                   final lastMessage = data['lastMessage'] ?? '';
                   final timestamp = (data['lastMessageTime'] as Timestamp?)?.toDate();
                   final timeText = timestamp != null

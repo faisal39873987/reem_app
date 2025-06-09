@@ -8,6 +8,7 @@ import 'screens/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/auth/phone_input_screen.dart';
 import 'screens/auth/sms_verification_screen.dart';
+import 'utils/theme.dart';
 import 'screens/auth/reset_password_screen.dart';
 import 'screens/landing_screen.dart';
 import 'screens/profile_screen.dart';
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Reem Verse',
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(primarySwatch: Colors.blue),
+            theme: appTheme,
             locale: provider.locale,
             home: const SplashScreen(),
             routes: {
