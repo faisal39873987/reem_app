@@ -31,7 +31,8 @@ import 'providers/locale_provider.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseCrashlytics.instance.log('bg message: \${message.messageId ?? "no-id"}');
+  FirebaseCrashlytics.instance
+      .log('bg message: ${message.messageId ?? "no-id"}');
 }
 
 void main() async {
