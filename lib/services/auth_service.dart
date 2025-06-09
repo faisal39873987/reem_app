@@ -4,7 +4,10 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth;
+
+  AuthService({FirebaseAuth? firebaseAuth})
+      : _auth = firebaseAuth ?? FirebaseAuth.instance;
 
   // ✅ Anonymous Sign-in
   Future<UserCredential> signInAnonymously() async {
