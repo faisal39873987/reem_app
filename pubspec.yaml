@@ -37,8 +37,8 @@ dependencies:
   geolocator: ^14.0.0
 
   # Social login
-  flutter_facebook_auth: ^6.0.1
-  sign_in_with_apple: ^6.1.0
+  flutter_facebook_auth: ^6.2.0
+  sign_in_with_apple: ^5.0.0
 
   # Cards UI / swipe
   swipe_cards: ^2.0.0+1
@@ -47,7 +47,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
-  firebase_auth_mocks: ^0.14.2
+  firebase_auth_mocks: ^0.13.0
 
 flutter:
   uses-material-design: true
@@ -58,3 +58,7 @@ flutter:
     - assets/audios/
     - assets/fonts/
     - assets/icons/
+
+dependency_overrides:
+  web: ^1.1.1
+
