@@ -5,11 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'notification_screen.dart';
 import 'chat_list_screen.dart';
 import 'search_screen.dart';
-import 'post_creation_screen.dart';
 import 'menu/account_screen.dart';
 import 'menu/privacy_policy_screen.dart';
 import 'menu/contact_us_screen.dart';
-import 'login_screen.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -126,8 +124,6 @@ class MainMenuScreen extends StatelessWidget {
                         '/login',
                         (route) => false,
                       );
-                      Navigator.of(context)
-                          .pushNamedAndRemoveUntil('/login', (route) => false);
                     },
                   ),
                 ),

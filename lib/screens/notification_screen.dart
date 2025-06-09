@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'chat_list_screen.dart';
-import 'search_screen.dart';
 import 'post_creation_screen.dart';
 import 'landing_screen.dart';
 import 'login_screen.dart';

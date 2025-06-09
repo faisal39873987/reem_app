@@ -58,14 +58,13 @@ class _LandingScreenState extends State<LandingScreen> {
           barrierDismissible: false,
           builder: (_) => IntroOverlay(
             animatedKeys: [homeKey, reemYouthKey, marketKey, addKey],
-            onFinish: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('intro_done', true);
-              if (!mounted) return;
-              setState(() => _showIntro = false);
-              Navigator.of(context).pop();
-              }
-            },
+              onFinish: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('intro_done', true);
+                if (!mounted) return;
+                setState(() => _showIntro = false);
+                Navigator.of(context).pop();
+              },
           ),
         );
       });
@@ -291,7 +290,6 @@ class _HomePageContentState extends State<HomePageContent> {
                     final postId = doc.id;
                     final data = doc.data() as Map<String, dynamic>;
                     final imageUrl = data['imageUrl'] ?? '';
-                    final description = data['description'] ?? '';
                     final price = data['price']?.toString() ?? '0';
                     final category = data['category'] ?? 'General';
                     final creatorId = data['creatorId'] ?? '';
@@ -325,22 +323,15 @@ class _HomePageContentState extends State<HomePageContent> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 8),
-                                      leading: CircleAvatar(
-                                        backgroundImage: userImage.isNotEmpty
-                                            ? NetworkImage(userImage)
-leading: CircleAvatar(
-  backgroundImage: userImage.isNotEmpty
-      ? NetworkImage(userImage)
-      : const AssetImage('assets/images/default_user.png') as ImageProvider,
-  radius: 20,
-),
-
-                                                as ImageProvider,
-                                        radius: 20,
-                                      ),
+                                      ListTile(
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
+                                        leading: CircleAvatar(
+                                          backgroundImage: userImage.isNotEmpty
+                                              ? NetworkImage(userImage)
+                                              : const AssetImage('assets/images/default_user.png') as ImageProvider,
+                                          radius: 20,
+                                        ),
                                       title: Text(
                                         userName,
                                         style: const TextStyle(fontWeight: FontWeight.bold),

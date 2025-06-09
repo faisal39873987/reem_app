@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => PostDetailsScreen(postData: postData),
+                      builder: (_) => PostDetailsScreen(postId: postDocs[index].id),
                     ),
                   );
                 },
