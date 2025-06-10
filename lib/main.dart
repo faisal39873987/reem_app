@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'firebase_options.dart';
+import 'services/notification_service.dart';
+import 'utils/theme.dart'; // تأكد من وجود هذا الملف وتعريف appTheme
+import 'dart:ui';
 
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/auth/phone_input_screen.dart';
 import 'screens/auth/sms_verification_screen.dart';
-import 'utils/theme.dart';
 import 'screens/auth/reset_password_screen.dart';
 import 'screens/landing_screen.dart';
 import 'screens/profile_screen.dart';
@@ -25,22 +27,39 @@ import 'screens/post_details_screen.dart';
 import 'screens/search_screen.dart';
 import 'providers/locale_provider.dart';
 
-FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+/// 🧠 Background message handler
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseCrashlytics.instance.log('Background message: ${message.messageId ?? "no-id"}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ تهيئة Firebase
+  // ✅ Firebase Initialization
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ Crashlytics
+  // ✅ Firebase Crashlytics Setup
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
 
-  // ✅ Messaging
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission();
+  // ✅ Firebase Messaging
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await FirebaseMessaging.instance.requestPermission();
+
+  // ✅ Local Notifications Init
+  await NotificationService.initialize();
+
+  // ✅ Firebase Analytics (فعليًا يمكن استخدامه لاحقًا)
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  analytics.logEvent(name: 'app_start');
 
   runApp(const MyApp());
 }
@@ -57,7 +76,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Reem Verse',
             debugShowCheckedModeBanner: false,
-            theme: appTheme,
+            theme: appTheme, // ⚠️ تأكد أنه معرف في utils/theme.dart
             locale: provider.locale,
             home: const SplashScreen(),
             routes: {
@@ -73,6 +92,7 @@ class MyApp extends StatelessWidget {
               '/menu': (_) => const MainMenuScreen(),
               '/post': (_) => const PostCreationScreen(),
               '/search': (_) => const SearchScreen(),
+              '/post_details': (_) => const PostDetailsScreen(),
             },
           );
         },
