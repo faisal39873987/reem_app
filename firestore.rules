@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 👤 المستخدمين
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 🛠️ الخدمات
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == request.resource.data.creatorId;
+    }
+
+    // 📝 البوستات
+    match /posts/{postId} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == request.resource.data.creatorId;
+
+      // 💬 التعليقات
+      match /comments/{commentId} {
+        allow read, write: if request.auth != null;
+      }
+
+      // ❤️ اللايكات
+      match /likes/{likeId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // 💬 التعليقات العامة (خارج البوست)
+    match /comments/{commentId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 💬 المحادثات
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid in resource.data.participants;
+
+      // 📨 الرسائل
+      match /messages/{msgId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid in resource.data.participants;
+      }
+    }
+
+    // 📌 المحفوظات - posts
+    match /savedPosts/{docId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == request.resource.data.userId;
+    }
+
+    // 📌 المحفوظات - services
+    match /savedServices/{docId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == request.resource.data.userId;
+    }
+
+    // 👑 الريم يورث
+    match /reemYouth/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 📣 الإشعارات
+    match /notifications/{notifId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == request.resource.data.receiverId;
+    }
+
+    // 📬 رسائل الدعم
+    match /support_messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ❌ كل شيء غير معروف مرفوض
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
