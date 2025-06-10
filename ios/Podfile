@@ -40,10 +40,13 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
 
     target.build_configurations.each do |config|
-      # ✅ تعيين الحد الأدنى للنظام
+      # Set minimum iOS deployment target
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
 
-      # ✅ استثناء arm64 من المحاكي
+      # Disable bitcode to avoid deprecated setting warnings
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+
+      # Exclude arm64 for simulators to prevent build issues on Apple silicon
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
     end
   end
