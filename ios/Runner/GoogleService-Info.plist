@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>342300879153-b1ujv61c6jq8c7bbf89r59impirbjb05.apps.googleusercontent.com</string>
+	<string>342300879153-btgqe6qr02i3e06cbfom388bvqh05p9g.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.342300879153-b1ujv61c6jq8c7bbf89r59impirbjb05</string>
+	<string>com.googleusercontent.apps.342300879153-btgqe6qr02i3e06cbfom388bvqh05p9g</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBRU9GbVdoNUdwzhwWcmRHOM9HnH8_xGEY</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.reemVerseRebuild</string>
+	<string>com.reemverse.app</string>
 	<key>PROJECT_ID</key>
 	<string>reemverse-prod-24</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:342300879153:ios:52a682d1c70692665ee810</string>
+	<string>1:342300879153:ios:55340badc9e013525ee810</string>
 </dict>
 </plist>
