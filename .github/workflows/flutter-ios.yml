@@ -7,34 +7,23 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: "3.22.1"
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.6' # أو أي إصدار مشروعك
 
-    - name: Install Flutter dependencies
-      run: flutter pub get
+      - name: Install dependencies
+        run: flutter pub get
 
-    - name: Clean project
-      run: flutter clean
+      - name: Build IPA
+        run: flutter build ipa --release
 
-    - name: Build iOS (release, no codesign)
-      run: flutter build ios --release --no-codesign
-
-    - name: Archive .ipa
-      run: |
-        mkdir -p output
-        cd build/ios/iphoneos
-        /usr/bin/xcrun \
-          -sdk iphoneos \
-          PackageApplication -v Runner.app \
-          -o "$GITHUB_WORKSPACE/output/Runner.ipa"
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ReemVerse-iOS
-        path: output/Runner.ipa
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-app-store-build@v1
+        with:
+          apiKey: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+          issuerId: ${{ secrets.APPSTORE_ISSUER_ID }}
+          keyId: ${{ secrets.APPSTORE_KEY_ID }}
