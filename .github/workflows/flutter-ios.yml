@@ -22,9 +22,9 @@ jobs:
         run: flutter build ipa --release
 
       - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight@main
+        uses: apple-actions/upload-app-store-build@v1
+     with:
+      apiKey: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+      issuerId: ${{ secrets.APPSTORE_ISSUER_ID }}
+      keyId: ${{ secrets.APPSTORE_KEY_ID }}
 
-        with:
-          apiKey: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          issuerId: ${{ secrets.APPSTORE_ISSUER_ID }}
-          keyId: ${{ secrets.APPSTORE_KEY_ID }}
