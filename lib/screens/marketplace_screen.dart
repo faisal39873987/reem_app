@@ -220,9 +220,8 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
+                            boxShadow: [                                BoxShadow(
+                                color: Colors.grey.withAlpha(51), // 0.2 opacity = 51 alpha
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),

@@ -8,6 +8,7 @@ class Post {
   final bool isAnonymous;
   final double latitude;
   final double longitude;
+  final DateTime timestamp;
 
   Post({
     required this.id,
@@ -19,6 +20,7 @@ class Post {
     required this.isAnonymous,
     required this.latitude,
     required this.longitude,
+    required this.timestamp,
   });
 
   factory Post.fromMap(String id, Map<String, dynamic> data) {
@@ -32,6 +34,10 @@ class Post {
       isAnonymous: data['isAnonymous'] ?? false,
       latitude: data['location']?['latitude'] ?? 0.0,
       longitude: data['location']?['longitude'] ?? 0.0,
+      timestamp: (data['timestamp'] as Map<String, dynamic>?)?['_seconds'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (data['timestamp']['_seconds'] * 1000).toInt())
+          : DateTime.now(),
     );
   }
 }

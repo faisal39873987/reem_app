@@ -160,11 +160,27 @@ class _HomePageContentState extends State<HomePageContent> {
 
   Future<void> _fetchLocation() async {
     try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        final requestedPermission = await Geolocator.requestPermission();
+        if (requestedPermission == LocationPermission.denied) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permission is required for distance calculation')),
+          );
+          return;
+        }
+      }
+      
       final pos = await Geolocator.getCurrentPosition();
       if (!mounted) return;
       setState(() => _userLocation = pos);
     } catch (e) {
+      if (!mounted) return;
       debugPrint("📍 Location error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to get location: ${e.toString()}')),
+      );
     }
   }
 

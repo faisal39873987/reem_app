@@ -25,12 +25,15 @@ class _SignupScreenState extends State<SignupScreen> {
     final birthDate = _birthDateController.text.trim();
     final phone = _phoneController.text.trim();
 
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    
     if (email.isEmpty ||
         password.isEmpty ||
         name.isEmpty ||
         birthDate.isEmpty ||
         phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
       );
       return;
@@ -55,16 +58,21 @@ class _SignupScreenState extends State<SignupScreen> {
         'createdAt': Timestamp.now(),
       });
 
+      if (!mounted) return;
+      final navigator = Navigator.of(context);
+      final messenger = ScaffoldMessenger.of(context);
+      
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phone,
         verificationCompleted: (PhoneAuthCredential cred) async {
           await credential.user!.linkWithCredential(cred);
         },
         verificationFailed: (FirebaseAuthException e) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('Phone verify failed: ${e.message}')));
+          if (!mounted) return;
+          messenger.showSnackBar(SnackBar(content: Text('Phone verify failed: ${e.message}')));
         },
         codeSent: (String verificationId, int? resendToken) async {
+          if (!mounted) return;
           final smsController = TextEditingController();
           final code = await showDialog<String>(
             context: context,
@@ -92,18 +100,20 @@ class _SignupScreenState extends State<SignupScreen> {
         codeAutoRetrievalTimeout: (_) {},
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
           const SnackBar(content: Text('Verification email sent. Please verify before login.')));
       await FirebaseAuth.instance.signOut();
-      Navigator.of(context).pushReplacementNamed('/login');
+      navigator.pushReplacementNamed('/login');
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
       String message = "Signup failed.";
       if (e.code == 'email-already-in-use') message = "Email is already registered.";
       if (e.code == 'invalid-email') message = "Invalid email format.";
       if (e.code == 'weak-password') message = "Password too weak.";
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      messenger.showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      messenger.showSnackBar(
         const SnackBar(content: Text("Something went wrong")),
       );
     } finally {

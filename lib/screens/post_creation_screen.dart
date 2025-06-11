@@ -62,10 +62,15 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (!mounted) return;
-    if (pickedFile != null) {
-      setState(() => _imageFile = File(pickedFile.path));
+    try {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (!mounted) return;
+      if (pickedFile != null) {
+        setState(() => _imageFile = File(pickedFile.path));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack('Failed to pick image: ${e.toString()}');
     }
   }
 

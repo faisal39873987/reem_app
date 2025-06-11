@@ -26,19 +26,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
   }
 
   Future<void> _sendResetEmail() async {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Email is required')));
+      messenger.showSnackBar(const SnackBar(content: Text('Email is required')));
       return;
     }
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      messenger.showSnackBar(
           const SnackBar(content: Text('Reset email sent. Check your inbox.')));
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
     }
   }
 
@@ -67,6 +69,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
   }
 
   Future<void> _verifyAndReset() async {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
     final code = _smsController.text.trim();
     final newPass = _newPasswordController.text.trim();
     if (code.length < 6 || newPass.isEmpty || _verificationId == null) return;
@@ -75,11 +79,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           verificationId: _verificationId!, smsCode: code);
       final result = await FirebaseAuth.instance.signInWithCredential(cred);
       await result.user?.updatePassword(newPass);
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      messenger.showSnackBar(
           const SnackBar(content: Text('Password updated')));
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 

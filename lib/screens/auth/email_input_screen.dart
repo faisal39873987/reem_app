@@ -49,11 +49,15 @@ class EmailInputScreen extends StatelessWidget {
                   }
 
                   try {
+                    if (!mounted) return;
+                    final messenger = ScaffoldMessenger.of(context);
                     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    if (!mounted) return;
+                    messenger.showSnackBar(
                       const SnackBar(content: Text("Reset link sent to email")),
                     );
                   } on FirebaseAuthException catch (e) {
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Error: ${e.message}")),
                     );

@@ -18,22 +18,50 @@ class _SocialLoginScreenState extends State<SocialLoginScreen> {
   bool _isLoading = false;
 
   Future<void> _signInWithFacebook() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
+    
     try {
       final LoginResult result = await FacebookAuth.instance.login();
-      if (result.status == LoginStatus.success) {
-        final OAuthCredential facebookAuthCredential =
-            FacebookAuthProvider.credential(result.accessToken!.tokenString);
-        await _auth.signInWithCredential(facebookAuthCredential);
-        await NotificationService.initialize();
-        await _setLoginFlags();
-        _navigateToLanding();
-      } else {
-        _showError("Facebook Sign-In failed");
+      if (!mounted) return;
+      
+      switch (result.status) {
+        case LoginStatus.success:
+          if (result.accessToken == null) {
+            throw Exception('Facebook access token is null');
+          }
+          
+          final OAuthCredential facebookAuthCredential =
+              FacebookAuthProvider.credential(result.accessToken!.token);
+              
+          final userCredential = await _auth.signInWithCredential(facebookAuthCredential);
+          if (!mounted) return;
+          
+          if (userCredential.user == null) {
+            throw Exception('Failed to get user data from Facebook');
+          }
+          
+          await NotificationService.initialize();
+          await _setLoginFlags();
+          _navigateToLanding();
+          break;
+          
+        case LoginStatus.cancelled:
+          _showError("Sign-in was cancelled");
+          break;
+          
+        case LoginStatus.failed:
+          _showError("Facebook Sign-In failed: ${result.message}");
+          break;
+          
+        default:
+          _showError("Unexpected login status: ${result.status}");
       }
     } catch (e) {
-      _showError("Facebook Sign-In error: $e");
+      if (!mounted) return;
+      _showError("Facebook Sign-In error: ${e.toString()}");
     } finally {
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }

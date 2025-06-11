@@ -78,6 +78,20 @@ class ChatListScreen extends StatelessWidget {
                     .doc(otherUserId)
                     .get(),
                 builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  
+                  if (userSnapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Error: ${userSnapshot.error}'),
+                    );
+                  }
+
                   if (!userSnapshot.hasData || userSnapshot.data == null) {
                     return const SizedBox.shrink();
                   }

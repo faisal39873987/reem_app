@@ -24,9 +24,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const kPrimaryColor,
+      backgroundColor: kPrimaryColor,
       appBar: AppBar(
-        backgroundColor: const kPrimaryColor,
+        backgroundColor: kPrimaryColor,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),

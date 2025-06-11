@@ -35,9 +35,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 
   void _loadSavedEmail() async {
+    if (!mounted) return;
     final prefs = await SharedPreferences.getInstance();
     final savedEmail = prefs.getString('savedEmail');
-    if (savedEmail != null && savedEmail.isNotEmpty) {
+    if (savedEmail != null && savedEmail.isNotEmpty && mounted) {
       _emailController.text = savedEmail;
       setState(() => _rememberMe = true);
     }

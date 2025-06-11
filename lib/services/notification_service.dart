@@ -11,9 +11,9 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // Handle foreground messages if needed
     });
-    FirebaseMessaging.onTokenRefresh.listen((token) async {
+    await for (final token in FirebaseMessaging.instance.onTokenRefresh) {
       await _saveToken(token);
-    });
+    }
   }
 
   static Future<void> _updateToken() async {
