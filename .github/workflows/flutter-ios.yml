@@ -3,34 +3,40 @@ name: Build iOS Release
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
+    
     env:
-      DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
-      FLUTTER_VERSION: '3.19.6'
+      XCODE_VERSION: '15.2'
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode.app
+      - uses: actions/checkout@v4
+      
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app/Contents/Developer
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
+          flutter-version: '3.19.6'
           cache: true
-
+          
       - name: Install dependencies
-        run: |
-          flutter pub get
-          cd ios && pod install && cd ..
+        run: flutter pub get
         
+      - name: Flutter Clean
+        run: flutter clean
+        
+      - name: Setup keychain
+        run: |
+          security create-keychain -p '' build.keychain
+          security list-keychains -d user -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p '' build.keychain
+          security set-keychain-settings build.keychain
+
       - name: Setup iOS certificates
         uses: apple-actions/import-codesigning-certs@v1
         with:
@@ -48,30 +54,17 @@ jobs:
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
 
-      - name: Increment build number
-        run: |
-          cd ios
-          agvtool new-version -all ${{ github.run_number }}
-          cd ..
+      - name: Validate Xcode setup
+        run: flutter doctor -v
 
       - name: Build IPA
-        run: |
-          flutter build ipa --release \
-            --export-options-plist=ios/Runner/ExportOptions.plist
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ipa-build
-          path: build/ios/ipa/*.ipa
-          retention-days: 5
+        run: flutter build ipa --release --export-method app-store
 
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight@v1
         with:
-          app-path: build/ios/ipa/*.ipa
+          ipa-path: build/ios/ipa/*.ipa
           api-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          distribute-external: true
-          notify-external-testers: true
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          expire-build-submitted-date: 30
