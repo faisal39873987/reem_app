@@ -1,71 +1,54 @@
-name: Build iOS Release
+name: Flutter iOS Build
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Build iOS & Upload
     runs-on: macos-latest
     
     env:
-      XCODE_VERSION: '15.2'
-    
-    steps:
-      - uses: actions/checkout@v4
+      DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
       
-      - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app/Contents/Developer
-
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.32.2'
+          channel: 'stable'
           cache: true
           
-      - name: Install dependencies
+      - name: Install Flutter Dependencies
         run: flutter pub get
         
-      - name: Flutter Clean
-        run: flutter clean
+      - name: Pod Install
+        working-directory: ios
+        run: pod install
         
-      - name: Setup keychain
+      - name: Build IPA
         run: |
-          security create-keychain -p '' build.keychain
-          security list-keychains -d user -s build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p '' build.keychain
-          security set-keychain-settings build.keychain
-
-      - name: Setup iOS certificates
-        uses: apple-actions/import-codesigning-certs@v1
+          flutter build ipa --release --no-codesign \
+            --export-method app-store
+            
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
         with:
-          p12-file-base64: ${{ secrets.IOS_P12_CERTIFICATE }}
-          p12-password: ${{ secrets.IOS_P12_PASSWORD }}
-          keychain: build.keychain
-          keychain-password: ''
-
-      - name: Setup provisioning profile
-        uses: apple-actions/download-provisioning-profiles@v1
-        with:
-          bundle-id: 'com.reemverse.app'
-          profile-type: 'IOS_APP_STORE'
+          app-path: build/ios/ipa/*.ipa
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-
-      - name: Validate Xcode setup
-        run: flutter doctor -v
-
-      - name: Build IPA
-        run: flutter build ipa --release --export-method app-store
-
-      - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight@v1
-        with:
-          ipa-path: build/ios/ipa/*.ipa
-          api-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          expire-build-submitted-date: 30
           
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-ipa
+          path: build/ios/ipa/*.ipa
+          retention-days: 5
