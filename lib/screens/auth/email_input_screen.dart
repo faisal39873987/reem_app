@@ -1,6 +1,6 @@
 // lib/screens/auth/email_input_screen.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../utils/constants.dart';
 
 class EmailInputScreen extends StatelessWidget {
@@ -8,7 +8,8 @@ class EmailInputScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _emailController = TextEditingController();
+    debugPrint('BUILD: EmailInputScreen');
+    final emailController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -30,7 +31,7 @@ class EmailInputScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: _emailController,
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: "Email Address",
@@ -40,31 +41,33 @@ class EmailInputScreen extends StatelessWidget {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () async {
-                  final email = _emailController.text.trim();
+                  final email = emailController.text.trim();
+                  final messenger = ScaffoldMessenger.of(context);
                   if (email.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       const SnackBar(content: Text("Please enter your email")),
                     );
                     return;
                   }
-
                   try {
-                    if (!mounted) return;
-                    final messenger = ScaffoldMessenger.of(context);
-                    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-                    if (!mounted) return;
-                    messenger.showSnackBar(
-                      const SnackBar(content: Text("Reset link sent to email")),
+                    await Supabase.instance.client.auth.resetPasswordForEmail(
+                      email,
                     );
-                  } on FirebaseAuthException catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error: ${e.message}")),
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني",
+                        ),
+                      ),
+                    );
+                  } catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text("Failed to send: $e")),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const kPrimaryColor,
+                  backgroundColor: kPrimaryColor,
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text("Send Recovery Email"),

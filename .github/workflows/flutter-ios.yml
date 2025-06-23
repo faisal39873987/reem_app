@@ -1,48 +1,27 @@
-name: Build iOS
+name: Flutter iOS CI
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build:
-    name: Build iOS & Upload
     runs-on: macos-latest
-      
     steps:
       - uses: actions/checkout@v4
-        
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.2'
-          channel: 'stable'
-          cache: true
-          
-      - name: Install Flutter Dependencies
-        run: flutter pub get
-        
-      - name: Pod Install
-        working-directory: ios
-        run: pod install
-        
-      - name: Build IPA
+          flutter-version: '3.22.0'
+      - name: Install CocoaPods
         run: |
-          flutter build ipa --release --no-codesign \
-            --export-method app-store
-            
-      - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v1
-        with:
-          app-path: build/ios/ipa/*.ipa
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-          
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-ipa
-          path: build/ios/ipa/*.ipa
-          retention-days: 5
+          sudo gem install cocoapods
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Build iOS (debug)
+        run: flutter build ios --debug --no-codesign
+      - name: Archive iOS (release)
+        run: flutter build ios --release --no-codesign

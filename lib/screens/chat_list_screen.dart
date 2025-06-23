@@ -1,127 +1,167 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../utils/constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/messages_service.dart';
 import 'chat_screen.dart';
+import '../utils/constants.dart';
+import '../models/message.dart';
+import '../models/profile.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final uid = user?.uid;
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
 
-    if (uid == null || (user?.isAnonymous ?? true)) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 1,
-          iconTheme: const IconThemeData(color: kPrimaryColor),
-          title: const Text('Chats', style: TextStyle(
-            color: kPrimaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          )),
-        ),
-        backgroundColor: Colors.white,
-        body: const Center(
-          child: Text("Please log in to view your chats."),
-        ),
+class _ChatListScreenState extends State<ChatListScreen> {
+  bool _loading = true;
+  String? _userId;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacementNamed('/login');
+      });
+    } else {
+      _userId = user.id;
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<Profile?> _getOtherUserProfile(String otherUserId) async {
+    try {
+      final data =
+          await Supabase.instance.client
+              .from('profiles')
+              .select()
+              .eq('id', otherUserId)
+              .maybeSingle();
+      if (data == null) return null;
+      return Profile.fromMap(data);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_userId == null) {
+      return const Scaffold(
+        body: Center(child: Text('Please log in to view your chats.')),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: kPrimaryColor),
-        title: const Text('My Chats', style: TextStyle(
-          color: kPrimaryColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        )),
+        title: const Text(
+          'My Chats',
+          style: TextStyle(
+            color: kPrimaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
       ),
       backgroundColor: Colors.white,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('chats')
-            .where('participants', arrayContains: uid)
-            .orderBy('lastMessageTime', descending: true)
-            .snapshots(),
+      body: StreamBuilder<List<Message>>(
+        stream: userMessagesStream(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data == null) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          final chats = snapshot.data!.docs;
-
-          if (chats.isEmpty) {
-            return const Center(child: Text('No chats found.'));
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: \\${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
-
+          final messages = snapshot.data ?? [];
+          if (messages.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'No chats yet. Start a conversation!',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+          // Group messages by chat (other user)
+          final Map<String, Message> latestByUser = {};
+          for (final msg in messages) {
+            final otherId =
+                msg.senderId == _userId ? msg.receiverId : msg.senderId;
+            if (!latestByUser.containsKey(otherId) ||
+                msg.createdAt.isAfter(latestByUser[otherId]!.createdAt)) {
+              latestByUser[otherId] = msg;
+            }
+          }
+          final chatList =
+              latestByUser.entries.toList()..sort(
+                (a, b) => b.value.createdAt.compareTo(a.value.createdAt),
+              );
           return ListView.separated(
-            itemCount: chats.length,
-            separatorBuilder: (_, __) => const Divider(),
-            itemBuilder: (context, index) {
-              final chat = chats[index];
-              final data = chat.data() as Map<String, dynamic>;
-              final participants = data['participants'];
-              if (participants is! List) return const SizedBox.shrink();
-              final users = List<String>.from(participants);
-              if (!users.contains(uid)) return const SizedBox.shrink();
-              final otherUserId = users.firstWhere((id) => id != uid, orElse: () => uid!);
-
-              return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(otherUserId)
-                    .get(),
-                builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  
-                  if (userSnapshot.hasError) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('Error: ${userSnapshot.error}'),
-                    );
-                  }
-
-                  if (!userSnapshot.hasData || userSnapshot.data == null) {
-                    return const SizedBox.shrink();
-                  }
-
-                  final userData = userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
-                  final displayName = userData['name'] ?? 'User';
-                  final photoUrl = userData['photoUrl'] ?? '';
-                  final lastMessage = data['lastMessage'] ?? '';
-                  final timestamp = (data['lastMessageTime'] as Timestamp?)?.toDate();
-                  final timeText = timestamp != null
-                      ? TimeOfDay.fromDateTime(timestamp).format(context)
-                      : '';
-
+            itemCount: chatList.length,
+            separatorBuilder: (context, i) => const Divider(),
+            itemBuilder: (context, i) {
+              final otherUserId = chatList[i].key;
+              final msg = chatList[i].value;
+              return FutureBuilder<Profile?>(
+                future: _getOtherUserProfile(otherUserId),
+                builder: (context, snap) {
+                  final profile = snap.data;
+                  final name = profile?.fullName ?? 'User';
+                  final avatar = profile?.avatarUrl ?? '';
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                      child: photoUrl.isEmpty ? const Icon(Icons.person) : null,
+                      backgroundImage:
+                          avatar.isNotEmpty ? NetworkImage(avatar) : null,
+                      backgroundColor: kPrimaryColor.withAlpha(
+                        (0.2 * 255).toInt(),
+                      ),
+                      child:
+                          avatar.isEmpty
+                              ? const Icon(Icons.person, color: Colors.white)
+                              : null,
                     ),
-                    title: Text(displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: Text(timeText, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    title: Text(
+                      name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      msg.content,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: Text(
+                      TimeOfDay.fromDateTime(msg.createdAt).format(context),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            chatId: chat.id,
-                            receiverId: otherUserId,
-                            receiverName: displayName,
-                            receiverImage: photoUrl,
-                          ),
+                          builder:
+                              (_) => ChatScreen(
+                                chatId: msg.id,
+                                receiverId: otherUserId,
+                                receiverName: name,
+                                receiverImage: avatar,
+                              ),
                         ),
                       );
                     },

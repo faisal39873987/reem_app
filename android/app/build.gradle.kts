@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") // ✅ Firebase
 }
 
 android {
@@ -19,21 +18,24 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-   defaultConfig {
-    applicationId = "com.example.reem_verse_rebuild"
-    minSdk = 23 // ← هنا التعديل المطلوب
-    targetSdk = flutter.targetSdkVersion
-    versionCode = flutter.versionCode
-    versionName = flutter.versionName
+    defaultConfig {
+        applicationId = "com.example.reem_verse_rebuild"
+        minSdk = 23 // ← هنا التعديل المطلوب
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
 
-    manifestPlaceholders.putAll(
-        mapOf(
-            "facebookAppId" to "@string/facebook_app_id",
-            "facebookClientToken" to "@string/facebook_client_token"
+        manifestPlaceholders.putAll(
+            mapOf(
+                "facebookAppId" to "@string/facebook_app_id",
+                "facebookClientToken" to "@string/facebook_client_token"
+            )
         )
-    )
-}
+    }
 
+    buildFeatures {
+        buildConfig = true
+    }
 
     buildTypes {
         release {
@@ -45,5 +47,3 @@ android {
 flutter {
     source = "../.."
 }
-
-apply(plugin = "com.google.gms.google-services")

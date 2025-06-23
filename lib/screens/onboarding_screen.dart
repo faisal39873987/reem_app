@@ -21,9 +21,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   Future<void> _completeOnboarding() async {
+    debugPrint('ONBOARDING: Completing onboarding');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isFirstTime', false);
     if (!mounted) return;
+    debugPrint('NAVIGATE: To /login (from OnboardingScreen)');
     Navigator.of(context).pushReplacementNamed('/login');
   }
 
@@ -54,13 +56,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('BUILD: OnboardingScreen');
     return Scaffold(
       body: Stack(
         children: [
           PageView.builder(
             controller: _controller,
             itemCount: _images.length,
-            onPageChanged: (index) => setState(() => _currentPage = index),
+            onPageChanged: (index) {
+              if (!mounted) return;
+              setState(() => _currentPage = index);
+            },
             itemBuilder: (context, index) => _buildPage(_images[index]),
           ),
           Positioned(
@@ -68,10 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             right: 20,
             child: TextButton(
               onPressed: _completeOnboarding,
-              child: const Text(
-                "Skip",
-                style: TextStyle(color: Colors.black),
-              ),
+              child: const Text("Skip", style: TextStyle(color: Colors.black)),
             ),
           ),
           Positioned(
@@ -97,6 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_onboarding',
         onPressed: _nextPage,
         backgroundColor: kPrimaryColor,
         child: const Icon(Icons.arrow_forward_ios),

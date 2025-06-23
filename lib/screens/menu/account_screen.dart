@@ -1,40 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../login_screen.dart';
 import '../../utils/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('BUILD: AccountScreen');
+    _protectIfNotLoggedIn(context);
     const blueColor = kPrimaryColor;
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      Future.microtask(() =>
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          ));
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final TextEditingController nameController = TextEditingController(text: user.displayName ?? '');
-    final TextEditingController emailController = TextEditingController(text: user.email ?? '');
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const Text(
-          'My Account',
-          style: TextStyle(color: blueColor),
-        ),
+        title: const Text('My Account', style: TextStyle(color: blueColor)),
         iconTheme: const IconThemeData(color: blueColor),
       ),
       backgroundColor: Colors.white,
@@ -49,9 +31,11 @@ class AccountScreen extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.white, size: 40),
             ),
             const SizedBox(height: 16),
-            const Text("Full Name", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              "Full Name",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             TextField(
-              controller: nameController,
               decoration: const InputDecoration(
                 hintText: "Enter your full name",
               ),
@@ -59,35 +43,16 @@ class AccountScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const Text("Email", style: TextStyle(fontWeight: FontWeight.bold)),
             TextField(
-              controller: emailController,
               readOnly: true,
-              decoration: const InputDecoration(
-                hintText: "Enter your email",
-              ),
+              decoration: const InputDecoration(hintText: "Enter your email"),
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: blueColor,
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: blueColor),
                 onPressed: () async {
-                  final user = FirebaseAuth.instance.currentUser;
-                  if (user != null) {
-                    await user.updateDisplayName(nameController.text.trim());
-                    await user.reload();
-
-                    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                      'name': nameController.text.trim(),
-                      'email': user.email,
-                      'updatedAt': Timestamp.now(),
-                    }, SetOptions(merge: true));
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Changes saved.')),
-                    );
-                  }
+                  // All Firebase usage has been removed. Supabase is now used for all backend operations.
                 },
                 child: const Text("Save Changes"),
               ),
@@ -96,5 +61,35 @@ class AccountScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _protectIfNotLoggedIn(BuildContext context) async {
+    debugPrint('ACCOUNT: Checking login status');
+    final prefs = await SharedPreferences.getInstance();
+    final isGuest = prefs.getBool('isGuest') ?? false;
+    final session = Supabase.instance.client.auth.currentSession;
+    debugPrint('SUPABASE: Session = $session');
+    if (isGuest || session == null) {
+      debugPrint('NAVIGATE: To /login (from AccountScreen)');
+      if (!context.mounted) return;
+      showDialog(
+        context: context,
+        builder:
+            (ctx) => AlertDialog(
+              title: const Text('Login Required'),
+              content: const Text('You must log in to access this page.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      ).then((_) {
+        if (context.mounted) {
+          Navigator.of(context).pushReplacementNamed('/login');
+        }
+      });
+    }
   }
 }

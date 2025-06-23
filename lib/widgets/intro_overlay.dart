@@ -6,7 +6,11 @@ class IntroOverlay extends StatefulWidget {
   final List<GlobalKey> animatedKeys;
   final VoidCallback onFinish;
 
-  const IntroOverlay({super.key, required this.animatedKeys, required this.onFinish});
+  const IntroOverlay({
+    super.key,
+    required this.animatedKeys,
+    required this.onFinish,
+  });
 
   @override
   State<IntroOverlay> createState() => _IntroOverlayState();
@@ -33,18 +37,20 @@ class _IntroOverlayState extends State<IntroOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final RenderBox? targetBox = widget.animatedKeys[_currentStep].currentContext?.findRenderObject() as RenderBox?;
-    final Offset targetOffset = targetBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+    final RenderBox? targetBox =
+        widget.animatedKeys[_currentStep].currentContext?.findRenderObject()
+            as RenderBox?;
+    final Offset targetOffset =
+        targetBox?.localToGlobal(Offset.zero) ?? Offset.zero;
     final Size targetSize = targetBox?.size ?? Size.zero;
 
-    final bool showAbove = targetOffset.dy > MediaQuery.of(context).size.height / 2;
+    final bool showAbove =
+        targetOffset.dy > MediaQuery.of(context).size.height / 2;
 
     return Stack(
       children: [
         Positioned.fill(
-          child: Container(
-            color: Colors.black.withOpacity(0.7),
-          ),
+          child: Container(color: Colors.black.withAlpha((0.7 * 255).toInt())),
         ),
         if (targetSize != Size.zero)
           Positioned(
@@ -62,9 +68,10 @@ class _IntroOverlayState extends State<IntroOverlay> {
           ),
         if (targetSize != Size.zero)
           Positioned(
-            top: showAbove
-                ? targetOffset.dy - targetSize.height - 140
-                : targetOffset.dy + targetSize.height + 24,
+            top:
+                showAbove
+                    ? targetOffset.dy - targetSize.height - 140
+                    : targetOffset.dy + targetSize.height + 24,
             left: 24,
             right: 24,
             child: Material(
@@ -75,7 +82,11 @@ class _IntroOverlayState extends State<IntroOverlay> {
                   color: kPrimaryColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Column(
@@ -95,7 +106,11 @@ class _IntroOverlayState extends State<IntroOverlay> {
                         ),
                       ),
                       onPressed: _nextStep,
-                      child: Text(_currentStep == widget.animatedKeys.length - 1 ? 'Finish' : 'Next'),
+                      child: Text(
+                        _currentStep == widget.animatedKeys.length - 1
+                            ? 'Finish'
+                            : 'Next',
+                      ),
                     ),
                   ],
                 ),

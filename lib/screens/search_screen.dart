@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'notification_screen.dart';
 import 'chat_list_screen.dart';
 import 'post_creation_screen.dart';
@@ -18,33 +17,21 @@ class _SearchScreenState extends State<SearchScreen> {
   String _searchTerm = '';
 
   void _navigateTo(BuildContext context, int index) {
+    debugPrint('NAVIGATE: SearchScreen bottom nav to index $index');
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => LandingScreen(initialIndex: index),
+        pageBuilder:
+            (context, animation, secondaryAnimation) =>
+                LandingScreen(initialIndex: index),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
     );
   }
 
-  Future<List<QueryDocumentSnapshot>> _getCombinedResults(String term) async {
-    final posts = await FirebaseFirestore.instance
-        .collection('posts')
-        .where('description', isGreaterThanOrEqualTo: term)
-        .where('description', isLessThanOrEqualTo: '$term\uf8ff')
-        .get();
-
-    final services = await FirebaseFirestore.instance
-        .collection('services')
-        .where('title', isGreaterThanOrEqualTo: term)
-        .where('title', isLessThanOrEqualTo: '$term\uf8ff')
-        .get();
-
-    return [...posts.docs, ...services.docs];
-  }
-
   @override
   Widget build(BuildContext context) {
+    debugPrint('BUILD: SearchScreen');
     const blueColor = kPrimaryColor;
 
     return Scaffold(
@@ -74,18 +61,28 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.notifications_none, color: blueColor),
+                    icon: const Icon(
+                      Icons.notifications_none,
+                      color: blueColor,
+                    ),
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
+                        ),
                       );
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.chat_bubble_outline, color: blueColor),
+                    icon: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: blueColor,
+                    ),
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const ChatListScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const ChatListScreen(),
+                        ),
                       );
                     },
                   ),
@@ -97,7 +94,10 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.all(16),
               child: TextField(
                 controller: _searchController,
-                onChanged: (value) => setState(() => _searchTerm = value.trim()),
+                onChanged: (value) {
+                  if (!mounted) return;
+                  setState(() => _searchTerm = value.trim());
+                },
                 decoration: const InputDecoration(
                   labelText: "Search posts and services",
                   border: OutlineInputBorder(),
@@ -105,41 +105,12 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             Expanded(
-              child: _searchTerm.isEmpty
-                  ? const Center(child: Text("Enter a keyword to search"))
-                  : FutureBuilder<List<QueryDocumentSnapshot>>(
-                      future: _getCombinedResults(_searchTerm),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return const Center(child: Text("Error loading results"));
-                        }
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(child: Text("No results found"));
-                        }
-                        final results = snapshot.data!;
-                        return ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: results.length,
-                          separatorBuilder: (_, __) => const Divider(),
-                          itemBuilder: (context, index) {
-                            final doc = results[index];
-                            final isPost = doc.reference.path.contains('posts');
-                            final data = doc.data() as Map<String, dynamic>;
-                            return ListTile(
-                              leading: Icon(
-                                isPost ? Icons.post_add : Icons.home_repair_service,
-                                color: blueColor,
-                              ),
-                              title: Text(data['title'] ?? data['description'] ?? ''),
-                              subtitle: Text("${isPost ? 'Post' : 'Service'} | AED ${data['price'] ?? 'N/A'}"),
-                            );
-                          },
-                        );
-                      },
-                    ),
+              child:
+                  _searchTerm.isEmpty
+                      ? const Center(child: Text("Enter a keyword to search"))
+                      : Center(
+                        child: Text("Search results for: $_searchTerm"),
+                      ), // Placeholder for search results
             ),
           ],
         ),
@@ -147,6 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
       floatingActionButton: Transform.translate(
         offset: const Offset(0, -8),
         child: FloatingActionButton(
+          heroTag: 'fab_search',
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PostCreationScreen()),

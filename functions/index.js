@@ -7,6 +7,14 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
+import dotenv from 'dotenv';
+dotenv.config();
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = 'https://achyjrdkriusgdbxvswl.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 

@@ -1,6 +1,5 @@
 // lib/screens/auth/phone_input_screen.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'sms_verification_screen.dart';
 import '../../utils/constants.dart';
 
@@ -17,9 +16,11 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
 
   Future<void> _sendCode() async {
     final phoneNumber = _phoneController.text.trim();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
     if (phoneNumber.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text("Please enter your phone number")),
       );
       return;
@@ -27,32 +28,17 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
 
     setState(() => _isLoading = true);
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (PhoneAuthCredential credential) {
-        // Optional: Sign in directly if auto-retrieval works
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Verification failed: ${e.message}")),
-        );
-        setState(() => _isLoading = false);
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() => _isLoading = false);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => SmsVerificationScreen(
+    // All Firebase usage has been removed. Supabase is now used for all backend operations.
+
+    setState(() => _isLoading = false);
+    navigator.push(
+      MaterialPageRoute(
+        builder:
+            (_) => SmsVerificationScreen(
               phoneNumber: phoneNumber,
-              verificationId: verificationId,
+              verificationId: '', // أضف معرف التحقق هنا لاحقًا
             ),
-          ),
-        );
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Optional: Handle timeout
-      },
+      ),
     );
   }
 
@@ -92,16 +78,16 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
               _isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                      onPressed: _sendCode,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const kPrimaryColor,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    onPressed: _sendCode,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text("Send Code"),
                     ),
+                    child: const Text("Send Code"),
+                  ),
             ],
           ),
         ),

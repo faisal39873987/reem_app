@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/constants.dart';
+import '../../services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,18 +15,22 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _birthDateController = TextEditingController();
   final _phoneController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _isLoading = false;
+  String? _signupError;
+  final bool _signupSuccess = false;
 
-  void _signup() async {
+  Future<void> _signup() async {
+    debugPrint('SIGNUP: Attempting signup');
+    setState(() => _isLoading = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final name = _nameController.text.trim();
     final birthDate = _birthDateController.text.trim();
     final phone = _phoneController.text.trim();
 
-    if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    
     if (email.isEmpty ||
         password.isEmpty ||
         name.isEmpty ||
@@ -36,93 +39,37 @@ class _SignupScreenState extends State<SignupScreen> {
       messenger.showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
       );
+      setState(() => _isLoading = false);
       return;
     }
-
-    setState(() => _isLoading = true);
-
     try {
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-
-      await credential.user!.sendEmailVerification();
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(credential.user!.uid)
-          .set({
-        'name': name,
-        'email': email,
-        'birthDate': birthDate,
-        'phone': phone,
-        'createdAt': Timestamp.now(),
-      });
-
-      if (!mounted) return;
-      final navigator = Navigator.of(context);
-      final messenger = ScaffoldMessenger.of(context);
-      
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phone,
-        verificationCompleted: (PhoneAuthCredential cred) async {
-          await credential.user!.linkWithCredential(cred);
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          if (!mounted) return;
-          messenger.showSnackBar(SnackBar(content: Text('Phone verify failed: ${e.message}')));
-        },
-        codeSent: (String verificationId, int? resendToken) async {
-          if (!mounted) return;
-          final smsController = TextEditingController();
-          final code = await showDialog<String>(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => AlertDialog(
-              title: const Text('Enter SMS Code'),
-              content: TextField(
-                controller: smsController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Code'),
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context, smsController.text.trim()),
-                    child: const Text('Verify')),
-              ],
-            ),
-          );
-          if (code != null && code.length >= 6) {
-            final phoneCred = PhoneAuthProvider.credential(
-                verificationId: verificationId, smsCode: code);
-            await credential.user!.linkWithCredential(phoneCred);
-          }
-        },
-        codeAutoRetrievalTimeout: (_) {},
+      final res = await _authService.signUpWithEmailPassword(
+        email: email,
+        password: password,
+        name: name,
+        phone: phone,
+        birthDate: birthDate,
       );
-      if (!mounted) return;
-      messenger.showSnackBar(
-          const SnackBar(content: Text('Verification email sent. Please verify before login.')));
-      await FirebaseAuth.instance.signOut();
-      navigator.pushReplacementNamed('/login');
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      String message = "Signup failed.";
-      if (e.code == 'email-already-in-use') message = "Email is already registered.";
-      if (e.code == 'invalid-email') message = "Invalid email format.";
-      if (e.code == 'weak-password') message = "Password too weak.";
-      messenger.showSnackBar(SnackBar(content: Text(message)));
+      debugPrint('SIGNUP: Signup result = $res');
+      if (res.session == null || res.user == null) {
+        setState(
+          () =>
+              _signupError = 'Account creation failed. Please check your data.',
+        );
+        return;
+      }
+      debugPrint('NAVIGATE: To /landing (from SignupScreen)');
+      navigator.pushReplacementNamed('/landing');
     } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(content: Text("Something went wrong")),
-      );
-    } finally {
-      setState(() => _isLoading = false);
+      debugPrint('SIGNUP: Error = $e');
+      setState(() => _signupError = e.toString());
     }
+    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('BUILD: SignupScreen');
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sign Up"),
@@ -141,7 +88,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: "Full Name",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -150,7 +99,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 keyboardType: TextInputType.datetime,
                 decoration: InputDecoration(
                   labelText: "Birth Date (YYYY-MM-DD)",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -159,7 +110,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: "Email",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -168,7 +121,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: "Phone",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -177,26 +132,39 @@ class _SignupScreenState extends State<SignupScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Password",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
+              if (_signupError != null) ...[
+                Text(_signupError!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 12),
+              ],
+              if (_signupSuccess) ...[
+                const Text(
+                  'Signup successful! Please check your email for verification.',
+                  style: TextStyle(color: Colors.green),
+                ),
+                const SizedBox(height: 12),
+              ],
               _isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                      onPressed: _signup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                    onPressed: _signup,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
             ],
           ),
         ),

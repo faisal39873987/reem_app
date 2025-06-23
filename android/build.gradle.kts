@@ -5,9 +5,6 @@ buildscript {
         google() // ✅ لازم يكون هنا
         mavenCentral()
     }
-    dependencies {
-        classpath("com.google.gms:google-services:4.4.0") // ✅ Firebase Plugin
-    }
 }
 
 allprojects {
@@ -26,7 +23,13 @@ subprojects {
 }
 
 subprojects {
-    project.evaluationDependsOn(":app")
+    // فرض تفعيل buildConfig لجميع المشاريع الفرعية
+    if (project.plugins.hasPlugin("com.android.library") || project.plugins.hasPlugin("com.android.application")) {
+        project.extensions.findByName("android")?.let { androidExt ->
+            val buildFeatures = androidExt.javaClass.getMethod("getBuildFeatures").invoke(androidExt)
+            buildFeatures?.javaClass?.getMethod("setBuildConfig", Boolean::class.javaObjectType)?.invoke(buildFeatures, true)
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

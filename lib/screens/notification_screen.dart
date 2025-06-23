@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'post_creation_screen.dart';
 import 'landing_screen.dart';
-import 'login_screen.dart';
 import '../utils/constants.dart';
+import '../models/notification.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -15,56 +14,60 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final uid = FirebaseAuth.instance.currentUser?.uid;
   int unreadCount = 0;
+  List<AppNotification> _notifications = [];
+  bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    if (uid != null) {
-      _listenUnreadCount();
-      _markAllAsRead();
-    }
+    _fetchNotifications();
   }
 
-  void _listenUnreadCount() {
-    FirebaseFirestore.instance
-        .collection('notifications')
-        .doc(uid)
-        .collection('list')
-        .where('read', isEqualTo: false)
-        .snapshots()
-        .listen((snapshot) {
+  Future<void> _fetchNotifications() async {
+    if (!mounted) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      // Replace with your Supabase notifications fetch logic
+      final res = await Supabase.instance.client
+          .from('notifications')
+          .select()
+          .order('created_at', ascending: false);
       if (!mounted) return;
       setState(() {
-        unreadCount = snapshot.docs.length;
+        _notifications =
+            List<Map<String, dynamic>>.from(
+              res,
+            ).map((e) => AppNotification.fromMap(e)).toList();
+        _loading = false;
       });
-    });
-  }
-
-  Future<void> _markAllAsRead() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('notifications')
-        .doc(uid)
-        .collection('list')
-        .where('read', isEqualTo: false)
-        .get();
-    for (final doc in snapshot.docs) {
-      await doc.reference.update({'read': true});
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
   Future<void> _refreshNotifications() async {
-    setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Notifications refreshed.')),
-    );
+    await _fetchNotifications();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Notifications refreshed.')));
   }
 
   void _navigateTo(int index) {
+    debugPrint('NAVIGATE: NotificationScreen bottom nav to index $index');
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => LandingScreen(initialIndex: index),
+        pageBuilder:
+            (context, animation, secondaryAnimation) =>
+                LandingScreen(initialIndex: index),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -73,17 +76,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('BUILD: NotificationScreen');
     const blue = kPrimaryColor;
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null || user.isAnonymous) {
-      Future.microtask(() {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
-      });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -94,7 +88,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
           children: [
             const Text(
               "Notifications",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: blue),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: blue,
+              ),
             ),
             if (unreadCount > 0) ...[
               const SizedBox(width: 8),
@@ -115,8 +113,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
         actions: [
           if (unreadCount > 0)
             TextButton(
-              onPressed: _markAllAsRead,
-              child: const Text("Mark all as read", style: TextStyle(color: blue)),
+              onPressed: () {},
+              child: const Text(
+                "Mark all as read",
+                style: TextStyle(color: blue),
+              ),
             ),
         ],
       ),
@@ -126,63 +127,99 @@ class _NotificationScreenState extends State<NotificationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshNotifications,
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('notifications')
-                    .doc(uid)
-                    .collection('list')
-                    .orderBy('timestamp', descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text("No notifications yet."));
-                  }
-
-                  final docs = snapshot.data!.docs;
-
-                  return ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    itemCount: docs.length,
-                    separatorBuilder: (_, __) => const Divider(),
-                    itemBuilder: (context, index) {
-                      final data = docs[index].data() as Map<String, dynamic>;
-                      final title = data['title'] ?? 'Notification';
-                      final subtitle = data['subtitle'] ?? '';
-                      final time = (data['timestamp'] as Timestamp?)?.toDate();
-                      final timeText = time != null ? DateFormat.yMMMd().add_jm().format(time) : '';
-
-                      return ListTile(
-                        leading: Icon(
-                          Icons.notifications,
-                          color: data['read'] == false ? blue : Colors.grey,
+            child:
+                _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.notifications_off,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Notifications are currently unavailable.',
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                    : _notifications.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.notifications_none,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No notifications yet.',
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                    : RefreshIndicator(
+                      onRefresh: _refreshNotifications,
+                      child: ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
-                        title: Text(title),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(subtitle),
-                            if (timeText.isNotEmpty)
-                              Text(timeText, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+                        itemCount: _notifications.length,
+                        separatorBuilder: (context, _) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final notif = _notifications[index];
+                          final title =
+                              notif.title.isNotEmpty
+                                  ? notif.title
+                                  : 'Notification';
+                          final subtitle = notif.body;
+                          final createdAt = notif.createdAt;
+                          final timeText = DateFormat.yMMMd().add_jm().format(
+                            createdAt,
+                          );
+                          return ListTile(
+                            leading: const Icon(
+                              Icons.notifications,
+                              color: kPrimaryColor,
+                            ),
+                            title: Text(title),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(subtitle),
+                                if (timeText.isNotEmpty)
+                                  Text(
+                                    timeText,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
           ),
         ],
       ),
       floatingActionButton: Transform.translate(
         offset: const Offset(0, -8),
         child: FloatingActionButton(
+          heroTag: 'fab_notification',
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PostCreationScreen()),
@@ -203,11 +240,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(icon: const Icon(Icons.home, color: blue), onPressed: () => _navigateTo(0)),
-              IconButton(icon: const Icon(Icons.store, color: blue), onPressed: () => _navigateTo(1)),
+              IconButton(
+                icon: const Icon(Icons.home, color: blue),
+                onPressed: () => _navigateTo(0),
+              ),
+              IconButton(
+                icon: const Icon(Icons.store, color: blue),
+                onPressed: () => _navigateTo(1),
+              ),
               const SizedBox(width: 40),
-              IconButton(icon: const Icon(Icons.person, color: blue), onPressed: () => _navigateTo(2)),
-              IconButton(icon: const Icon(Icons.menu, color: blue), onPressed: () => _navigateTo(3)),
+              IconButton(
+                icon: const Icon(Icons.person, color: blue),
+                onPressed: () => _navigateTo(2),
+              ),
+              IconButton(
+                icon: const Icon(Icons.menu, color: blue),
+                onPressed: () => _navigateTo(3),
+              ),
             ],
           ),
         ),
