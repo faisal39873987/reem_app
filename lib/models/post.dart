@@ -1,31 +1,52 @@
 class Post {
   final String id;
-  final String? imageUrl;
-  final String? description;
-  final double? price;
-  final String? creatorId;
-  final String? category;
-  final bool? isAnonymous;
-  final double? latitude;
-  final double? longitude;
+  final String imageUrl;
+  final String description;
+  final double price;
+  final String creatorId;
+  final String category;
+  final bool isAnonymous;
+  final double latitude;
+  final double longitude;
   final DateTime timestamp;
 
   Post({
     required this.id,
-    this.imageUrl,
-    this.description,
-    this.price,
-    this.creatorId,
-    this.category,
-    this.isAnonymous,
-    this.latitude,
-    this.longitude,
+    required this.imageUrl,
+    required this.description,
+    required this.price,
+    required this.creatorId,
+    required this.category,
+    required this.isAnonymous,
+    required this.latitude,
+    required this.longitude,
     required this.timestamp,
   });
 
   factory Post.fromMap(dynamic id, Map<String, dynamic> data) {
-    double? parseDouble(dynamic value) =>
-        value == null ? null : double.tryParse(value.toString());
+    String parseString(dynamic value) {
+      if (value == null) return '';
+      if (value is String) return value;
+      if (value is int || value is double) return value.toString();
+      return value.toString();
+    }
+
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
+    bool parseBool(dynamic value) {
+      if (value == null) return false;
+      if (value is bool) return value;
+      if (value is int) return value == 1;
+      if (value is String) return value == 'true' || value == '1';
+      return false;
+    }
+
     DateTime parseTimestamp(dynamic value) {
       if (value == null) return DateTime.now();
       if (value is DateTime) return value;
@@ -43,17 +64,24 @@ class Post {
     }
 
     return Post(
-      id: id.toString(),
-      imageUrl: data['image_url'] ?? data['imageUrl'],
-      description: data['description'] ?? data['content'] ?? data['title'],
-      price: data['price'] != null ? parseDouble(data['price']) : null,
-      creatorId: data['user_id']?.toString(),
-      category: data['category'] ?? data['type'] ?? data['title'],
-      isAnonymous: data['isAnonymous'] == true || data['isAnonymous'] == 1,
-      latitude: data['latitude'] != null ? parseDouble(data['latitude']) : null,
+      id: parseString(id),
+      imageUrl: parseString(data['image_url'] ?? data['imageUrl']),
+      description: parseString(
+        data['description'] ?? data['content'] ?? data['title'],
+      ),
+      price: data['price'] != null ? parseDouble(data['price']) : 0.0,
+      creatorId: parseString(data['user_id'] ?? data['creatorId']),
+      category:
+          parseString(
+                data['category'] ?? data['type'] ?? data['title'],
+              ).isNotEmpty
+              ? parseString(data['category'] ?? data['type'] ?? data['title'])
+              : 'Services',
+      isAnonymous: parseBool(data['isAnonymous']),
+      latitude: data['latitude'] != null ? parseDouble(data['latitude']) : 0.0,
       longitude:
-          data['longitude'] != null ? parseDouble(data['longitude']) : null,
-      timestamp: parseTimestamp(data['created_at']),
+          data['longitude'] != null ? parseDouble(data['longitude']) : 0.0,
+      timestamp: parseTimestamp(data['timestamp'] ?? data['created_at']),
     );
   }
 }

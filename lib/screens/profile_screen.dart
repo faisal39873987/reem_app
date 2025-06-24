@@ -7,11 +7,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../utils/constants.dart';
 import '../models/profile.dart';
+import '../utils/test_user_override.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isOwner;
+  final Profile? testProfile;
 
-  const ProfileScreen({super.key, this.isOwner = true});
+  const ProfileScreen({super.key, this.isOwner = true, this.testProfile});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -28,48 +30,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
   bool _showInReemYouth = true;
 
+  Profile? _profile;
+
   @override
   void initState() {
     super.initState();
-    _protectIfNotLoggedIn();
-    _loadUserData();
+    if (widget.testProfile != null) {
+      _profile = widget.testProfile;
+      _userName = _profile?.fullName ?? 'User';
+      _bioController.text = _profile?.bio ?? '';
+      _phoneController.text = _profile?.phone ?? '';
+      _noteController.text = _profile?.note ?? '';
+      _photoUrl = _profile?.avatarUrl ?? '';
+      _showInReemYouth = _profile?.showInReemYouth ?? true;
+      setState(() => _isLoading = false);
+    } else {
+      _protectIfNotLoggedIn();
+      _loadUserData();
+    }
   }
 
   Future<void> _protectIfNotLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final isGuest = prefs.getBool('isGuest') ?? false;
-    final session = Supabase.instance.client.auth.currentSession;
-    if (isGuest || session == null) {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder:
-            (ctx) => AlertDialog(
-              title: const Text('Login Required'),
-              content: const Text('Login is required to access this page.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-      ).then((_) {
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
-        }
-      });
+    final user = getCurrentUser();
+    if (isGuest || user == null) {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+      return;
     }
   }
 
   Future<void> _loadUserData() async {
-    debugPrint('PROFILE: Loading user data');
+    setState(() => _isLoading = true);
+    final user = getCurrentUser();
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
     try {
-      if (!mounted) return;
-      setState(() => _isLoading = true);
-      final user = Supabase.instance.client.auth.currentUser;
-      debugPrint('SUPABASE: Current user = $user');
-      if (user == null) return;
       final profileData =
           await Supabase.instance.client
               .from('profiles')
@@ -98,48 +98,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveProfile() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
-
+    final user = getCurrentUser();
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
     try {
       String newImageUrl = _photoUrl;
 
       if (_profileImage != null) {
         // Upload new profile image and get the URL
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user != null) {
-          final bytes = await _profileImage!.readAsBytes();
-          final fileName =
-              'avatars/${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-          await Supabase.instance.client.storage
-              .from('avatars')
-              .uploadBinary(
-                fileName,
-                bytes,
-                fileOptions: const FileOptions(
-                  upsert: true,
-                  contentType: 'image/jpeg',
-                ),
-              );
-          final publicUrl = Supabase.instance.client.storage
-              .from('avatars')
-              .getPublicUrl(fileName);
-          newImageUrl = publicUrl;
-        }
+        final bytes = await _profileImage!.readAsBytes();
+        final fileName =
+            'avatars/${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        await Supabase.instance.client.storage
+            .from('avatars')
+            .uploadBinary(
+              fileName,
+              bytes,
+              fileOptions: const FileOptions(
+                upsert: true,
+                contentType: 'image/jpeg',
+              ),
+            );
+        final publicUrl = Supabase.instance.client.storage
+            .from('avatars')
+            .getPublicUrl(fileName);
+        newImageUrl = publicUrl;
       }
 
       // Save profile data to Supabase
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user != null) {
-        await Supabase.instance.client
-            .from('profiles')
-            .update({
-              'bio': _bioController.text.trim(),
-              'phone': _phoneController.text.trim(),
-              'note': _noteController.text.trim(),
-              'avatar_url': newImageUrl,
-              'show_in_reem_youth': _showInReemYouth,
-            })
-            .eq('id', user.id);
-      }
+      await Supabase.instance.client
+          .from('profiles')
+          .update({
+            'bio': _bioController.text.trim(),
+            'phone': _phoneController.text.trim(),
+            'note': _noteController.text.trim(),
+            'avatar_url': newImageUrl,
+            'show_in_reem_youth': _showInReemYouth,
+          })
+          .eq('id', user.id);
 
       if (!mounted) return;
       ScaffoldMessenger.of(

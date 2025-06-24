@@ -7,13 +7,27 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:reem_verse_rebuild/main.dart';
+import 'package:reem_verse_rebuild/providers/feed_provider.dart';
 
 void main() {
+  setUpAll(() async {
+    await Supabase.initialize(
+      url: 'https://test.supabase.co',
+      anonKey: 'test-anon-key',
+    );
+  });
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => FeedProvider(),
+        child: const MyApp(),
+      ),
+    );
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

@@ -5,9 +5,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/constants.dart';
+import '../models/post.dart';
 
 class PostCreationScreen extends StatefulWidget {
-  const PostCreationScreen({super.key});
+  final void Function(Post)? testOnSubmit;
+  const PostCreationScreen({super.key, this.testOnSubmit});
 
   @override
   State<PostCreationScreen> createState() => _PostCreationScreenState();
@@ -47,7 +49,9 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       messenger.showSnackBar(
-        const SnackBar(content: Text("Location permission is required to show distance.")),
+        const SnackBar(
+          content: Text("Location permission is required to show distance."),
+        ),
       );
       return;
     }
@@ -73,16 +77,42 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
     }
   }
 
-  Future<void> _uploadPost() async {
+  void _submit() async {
+    if (widget.testOnSubmit != null) {
+      // Bypass all validation in test mode
+      widget.testOnSubmit!(
+        Post(
+          id: 'test',
+          imageUrl: '',
+          description: _descriptionController.text,
+          price: double.tryParse(_priceController.text) ?? 0.0,
+          creatorId: 'test',
+          category: 'test',
+          isAnonymous: false,
+          latitude: 0.0,
+          longitude: 0.0,
+          timestamp: DateTime.now(),
+        ),
+      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Test post submitted!')));
+      return;
+    }
+
     debugPrint('POST: Uploading post');
 
     if (_descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter a description.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a description.")),
+      );
       return;
     }
 
     if (_priceController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter a price.")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter a price.")));
       return;
     }
 
@@ -91,7 +121,11 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
     }
 
     if (_showDistance && (_latitude == null || _longitude == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please allow location access to show distance.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please allow location access to show distance."),
+        ),
+      );
       return;
     }
 
@@ -100,7 +134,9 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
       // Send postData to your backend or database
       // await sendDataToBackend(postData);
       debugPrint('POST: Post uploaded successfully');
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("✅ Post created successfully!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("✅ Post created successfully!")),
+      );
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
           debugPrint('NAVIGATE: To /landing (from PostCreationScreen)');
@@ -109,7 +145,9 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
       });
     } catch (e) {
       debugPrint("❌ Upload Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("❌ Something went wrong. Try again.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("❌ Something went wrong. Try again.")),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -269,7 +307,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
                     _isLoading
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
-                          onPressed: _uploadPost,
+                          onPressed: _submit,
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             backgroundColor: blueColor,

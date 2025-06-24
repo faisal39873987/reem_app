@@ -21,10 +21,6 @@ class FeedProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _posts = await _feedService.fetchPosts();
-      print('FEED_PROVIDER: Parsed posts count: \\${_posts.length}');
-      print(
-        'FEED_PROVIDER: Parsed posts: \\${_posts.map((p) => p.id).toList()}',
-      );
       _initialized = true;
     } catch (e) {
       _error = e.toString();

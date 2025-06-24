@@ -7,7 +7,8 @@ import '../models/notification.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final List<AppNotification>? testNotifications;
+  const NotificationScreen({super.key, this.testNotifications});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -22,7 +23,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchNotifications();
+    if (widget.testNotifications != null) {
+      _notifications = widget.testNotifications!;
+      _loading = false;
+    } else {
+      _fetchNotifications();
+    }
   }
 
   Future<void> _fetchNotifications() async {
@@ -78,6 +84,32 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     // debugPrint('BUILD: NotificationScreen');
     const blue = kPrimaryColor;
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                _error!,
+                style: const TextStyle(fontSize: 18, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_notifications.isEmpty) {
+      return const Scaffold(
+        body: Center(child: Text('No notifications found.')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -161,7 +193,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            'No notifications yet.',
+                            'No notifications found.',
                             style: TextStyle(fontSize: 18, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
