@@ -34,6 +34,12 @@ jobs:
             echo 'YAML format error in pubspec.yaml.'
             exit 1
           fi
+      - name: Check required environment variables
+        run: |
+          if [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$SUPABASE_PROJECT_ID" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo 'One or more required Supabase environment variables are missing.'
+            exit 1
+          fi
       - name: Run Supabase migration
         run: |
           npx supabase db reset --db-url "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres" --file supabase_schema/init_schema.sql

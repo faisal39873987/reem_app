@@ -23,6 +23,13 @@ jobs:
           flutter-version: '3.32.4'
           channel: stable
 
+      - name: Check required environment variables
+        run: |
+          if [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$SUPABASE_PROJECT_ID" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo 'One or more required Supabase environment variables are missing.'
+            exit 1
+          fi
+
       - name: Run migration SQL
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
