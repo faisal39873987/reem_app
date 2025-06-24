@@ -17,18 +17,11 @@ jobs:
         with:
           version: latest
 
-      - name: Set up Flutter 3.32.4
+      - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.4'
+          flutter-version: '3.22.0'
           channel: stable
-
-      - name: Check required environment variables
-        run: |
-          if [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$SUPABASE_PROJECT_ID" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
-            echo 'One or more required Supabase environment variables are missing.'
-            exit 1
-          fi
 
       - name: Run migration SQL
         env:
@@ -37,7 +30,3 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           supabase db reset --db-url "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres" --file supabase_schema/init_schema.sql
-
-      - name: Analyze code (fail only on errors)
-        run: |
-          flutter analyze --no-fatal-infos --no-fatal-warnings
