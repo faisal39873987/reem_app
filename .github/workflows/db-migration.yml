@@ -17,10 +17,10 @@ jobs:
         with:
           version: latest
 
-      - name: Install Flutter
+      - name: Set up Flutter 3.32.4
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.32.4'
           channel: stable
 
       - name: Run migration SQL
