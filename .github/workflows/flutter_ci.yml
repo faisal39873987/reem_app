@@ -41,13 +41,20 @@ jobs:
             echo 'One or more required Supabase environment variables are missing.'
             exit 1
           fi
-      - name: Run Supabase migration
-        run: |
-          yes | npx supabase db reset --db-url "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres"
+      # - name: Run Supabase migration
+      #   run: |
+      #     yes | npx supabase db reset --db-url "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres"
+      #   env:
+      #     SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      #     SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      #     SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      - name: Apply schema.sql manually
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres" -f supabase_schema/init_schema.sql
       - name: Fail if migration error
         if: failure()
         run: |
