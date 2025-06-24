@@ -8,7 +8,7 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: AccountScreen');
+    // debugPrint('BUILD: AccountScreen');
     _protectIfNotLoggedIn(context);
     const blueColor = kPrimaryColor;
 
@@ -64,13 +64,13 @@ class AccountScreen extends StatelessWidget {
   }
 
   Future<void> _protectIfNotLoggedIn(BuildContext context) async {
-    debugPrint('ACCOUNT: Checking login status');
+    // debugPrint('ACCOUNT: Checking login status');
     final prefs = await SharedPreferences.getInstance();
     final isGuest = prefs.getBool('isGuest') ?? false;
     final session = Supabase.instance.client.auth.currentSession;
-    debugPrint('SUPABASE: Session = $session');
+    // debugPrint('SUPABASE: Session = $session');
     if (isGuest || session == null) {
-      debugPrint('NAVIGATE: To /login (from AccountScreen)');
+      // debugPrint('NAVIGATE: To /login (from AccountScreen)');
       if (!context.mounted) return;
       showDialog(
         context: context,

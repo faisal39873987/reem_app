@@ -45,7 +45,6 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   void _goToAddPost() async {
-    debugPrint('NAVIGATE: To /post (from LandingScreen)');
     final prefs = await SharedPreferences.getInstance();
     final isGuest = prefs.getBool('isGuest') ?? false;
     if (isGuest) {
@@ -61,7 +60,6 @@ class _LandingScreenState extends State<LandingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: LandingScreen');
     return Scaffold(
       backgroundColor: Colors.white,
       extendBody: true,

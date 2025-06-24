@@ -21,9 +21,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  debugPrint('MAIN: started');
+  // debugPrint('MAIN: started');
   // await dotenv.load(); // Disabled dotenv
-  debugPrint('MAIN: dotenv skipped');
+  // debugPrint('MAIN: dotenv skipped');
   // final supabaseUrl = dotenv.env['SUPABASE_URL'];
   // final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
   // debugPrint('MAIN: supabaseUrl = '
@@ -33,9 +33,9 @@ void main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjaHlqcmRrcml1c2dkYnh2c3dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMjE5MTIsImV4cCI6MjA2NDU5NzkxMn0.NLFeeZbuaUuTEIC6U6Dmvj04R066N8kMS2QWrLs1A58',
   );
-  debugPrint('MAIN: Supabase initialized');
+  // debugPrint('MAIN: Supabase initialized');
   runApp(const MyApp());
-  debugPrint('MAIN: runApp called');
+  // debugPrint('MAIN: runApp called');
 }
 
 class MyApp extends StatefulWidget {
@@ -96,17 +96,17 @@ class _AuthRedirectState extends State<AuthRedirect> {
   @override
   void initState() {
     super.initState();
-    debugPrint('AUTHREDIRECT: initState');
+    // debugPrint('AUTHREDIRECT: initState');
     _checkAuthAndNavigate();
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    debugPrint('AUTHREDIRECT: Checking onboarding flag');
+    // debugPrint('AUTHREDIRECT: Checking onboarding flag');
     final prefs = await SharedPreferences.getInstance();
     final isFirstTime = prefs.getBool('isFirstTime');
-    debugPrint('AUTHREDIRECT: isFirstTime = $isFirstTime');
+    // debugPrint('AUTHREDIRECT: isFirstTime = $isFirstTime');
     if (isFirstTime == null || isFirstTime == true) {
-      debugPrint('AUTHREDIRECT: Show onboarding');
+      // debugPrint('AUTHREDIRECT: Show onboarding');
       setState(() {
         _showOnboarding = true;
         _loading = false;
@@ -114,37 +114,37 @@ class _AuthRedirectState extends State<AuthRedirect> {
       return;
     }
     final wasGuest = prefs.getBool('wasGuest') ?? false;
-    debugPrint('AUTHREDIRECT: wasGuest = $wasGuest');
+    // debugPrint('AUTHREDIRECT: wasGuest = $wasGuest');
     final showWelcome = prefs.getBool('showWelcome') ?? true;
-    debugPrint('AUTHREDIRECT: showWelcome = $showWelcome');
+    // debugPrint('AUTHREDIRECT: showWelcome = $showWelcome');
     if (wasGuest) {
-      debugPrint('AUTHREDIRECT: Go to landing (wasGuest)');
+      // debugPrint('AUTHREDIRECT: Go to landing (wasGuest)');
       setState(() {
         _goToLanding = true;
         _loading = false;
       });
       return;
     }
-    debugPrint('SUPABASE: Fetching session...');
+    // debugPrint('SUPABASE: Fetching session...');
     final session = Supabase.instance.client.auth.currentSession;
-    debugPrint('SUPABASE: Session = $session');
+    // debugPrint('SUPABASE: Session = $session');
     if (session != null) {
       if (showWelcome) {
-        debugPrint('AUTHREDIRECT: Show welcome');
+        // debugPrint('AUTHREDIRECT: Show welcome');
         await prefs.setBool('showWelcome', false);
         setState(() {
           _showWelcome = true;
           _loading = false;
         });
       } else {
-        debugPrint('AUTHREDIRECT: Go to landing (session)');
+        // debugPrint('AUTHREDIRECT: Go to landing (session)');
         setState(() {
           _goToLanding = true;
           _loading = false;
         });
       }
     } else {
-      debugPrint('AUTHREDIRECT: Go to login (no session)');
+      // debugPrint('AUTHREDIRECT: Go to login (no session)');
       setState(() {
         _goToLanding = false;
         _loading = false;
@@ -154,7 +154,7 @@ class _AuthRedirectState extends State<AuthRedirect> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: AuthRedirect');
+    // debugPrint('BUILD: AuthRedirect');
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }

@@ -17,7 +17,6 @@ class _SearchScreenState extends State<SearchScreen> {
   String _searchTerm = '';
 
   void _navigateTo(BuildContext context, int index) {
-    debugPrint('NAVIGATE: SearchScreen bottom nav to index $index');
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder:
@@ -31,7 +30,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: SearchScreen');
     const blueColor = kPrimaryColor;
 
     return Scaffold(

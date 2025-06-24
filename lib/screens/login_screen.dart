@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
 
   void _login() async {
-    debugPrint('LOGIN: Attempting login');
+    // debugPrint('LOGIN: Attempting login');
     await _authService.signIn(
       context,
       _emailController.text.trim(),
@@ -29,31 +29,31 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToSignUp() {
-    debugPrint('NAVIGATE: To /signup (from LoginScreen)');
+    // debugPrint('NAVIGATE: To /signup (from LoginScreen)');
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const SignupScreen()));
   }
 
   void _navigateToForgotPassword() {
-    debugPrint('NAVIGATE: To /reset (from LoginScreen)');
+    // debugPrint('NAVIGATE: To /reset (from LoginScreen)');
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const EmailInputScreen()));
   }
 
   void _continueAsGuest() async {
-    debugPrint('LOGIN: Continue as guest');
+    // debugPrint('LOGIN: Continue as guest');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isGuest', true);
     if (!mounted) return;
-    debugPrint('NAVIGATE: To /landing (guest from LoginScreen)');
+    // debugPrint('NAVIGATE: To /landing (guest from LoginScreen)');
     Navigator.of(context).pushReplacementNamed('/landing');
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: LoginScreen');
+    // debugPrint('BUILD: LoginScreen');
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(

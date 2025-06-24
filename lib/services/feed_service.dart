@@ -10,14 +10,18 @@ class FeedService {
         .from('posts')
         .select()
         .order('created_at', ascending: false);
-    print('FEED_SERVICE: Raw posts response: ' + postsRes.toString());
+    // print('FEED_SERVICE: Raw posts response: ' + postsRes.toString());
     final marketplaceRes = await _client
         .from('marketplace')
         .select()
         .order('created_at', ascending: false);
-    print('FEED_SERVICE: Raw marketplace response: ' + marketplaceRes.toString());
-    final posts = (postsRes as List).map((e) => Post.fromMap(e['id'] ?? '', e)).toList();
-    final marketplace = (marketplaceRes as List).map((e) => Post.fromMap(e['id'] ?? '', e)).toList();
+    // print('FEED_SERVICE: Raw marketplace response: ' + marketplaceRes.toString());
+    final posts =
+        (postsRes as List).map((e) => Post.fromMap(e['id'] ?? '', e)).toList();
+    final marketplace =
+        (marketplaceRes as List)
+            .map((e) => Post.fromMap(e['id'] ?? '', e))
+            .toList();
     return [...posts, ...marketplace];
   }
 

@@ -15,7 +15,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
-          debugPrint('NAVIGATE: To /landing (from WelcomeScreen)');
+          // debugPrint('NAVIGATE: To /landing (from WelcomeScreen)');
           Navigator.pushReplacementNamed(context, '/landing');
         }
       });
@@ -24,7 +24,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: WelcomeScreen');
+    // debugPrint('BUILD: WelcomeScreen');
     return Scaffold(
       backgroundColor: kPrimaryColor,
       appBar: AppBar(

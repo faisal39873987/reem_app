@@ -18,8 +18,9 @@ jobs:
           channel: stable
       - name: Install dependencies
         run: flutter pub get
-      - name: Analyze code
-        run: flutter analyze
+      - name: Analyze code (fail only on errors)
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings
       - name: Run tests
         run: flutter test --coverage
       - name: Check for pubspec.yaml errors

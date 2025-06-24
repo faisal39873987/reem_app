@@ -21,7 +21,6 @@ class _PostScreenState extends State<PostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: PostScreen');
     const blueColor = kPrimaryColor;
 
     return Scaffold(
@@ -46,7 +45,6 @@ class _PostScreenState extends State<PostScreen> {
                 IconButton(
                   icon: const Icon(Icons.notifications_none, color: blueColor),
                   onPressed: () {
-                    debugPrint('NAVIGATE: NotificationScreen');
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const NotificationScreen(),
@@ -57,7 +55,6 @@ class _PostScreenState extends State<PostScreen> {
                 IconButton(
                   icon: const Icon(Icons.chat_bubble_outline, color: blueColor),
                   onPressed: () {
-                    debugPrint('NAVIGATE: ChatListScreen');
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ChatListScreen()),
                     );
@@ -66,7 +63,6 @@ class _PostScreenState extends State<PostScreen> {
                 IconButton(
                   icon: const Icon(Icons.search, color: blueColor),
                   onPressed: () {
-                    debugPrint('NAVIGATE: SearchScreen');
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const SearchScreen()),
                     );
@@ -84,7 +80,6 @@ class _PostScreenState extends State<PostScreen> {
         child: FloatingActionButton(
           heroTag: 'fab_post',
           onPressed: () {
-            debugPrint('NAVIGATE: PostCreationScreen');
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PostCreationScreen()),
             );
@@ -107,14 +102,12 @@ class _PostScreenState extends State<PostScreen> {
               IconButton(
                 icon: const Icon(Icons.home, color: blueColor),
                 onPressed: () {
-                  debugPrint('NAVIGATE: LandingPage');
                   Navigator.of(context).pushReplacementNamed('/landing');
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.store, color: blueColor),
                 onPressed: () {
-                  debugPrint('NAVIGATE: MarketplaceScreen');
                   Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
                       pageBuilder:
@@ -130,14 +123,12 @@ class _PostScreenState extends State<PostScreen> {
               IconButton(
                 icon: const Icon(Icons.person, color: blueColor),
                 onPressed: () {
-                  debugPrint('NAVIGATE: ProfilePage');
                   Navigator.of(context).pushReplacementNamed('/profile');
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.menu, color: blueColor),
                 onPressed: () {
-                  debugPrint('NAVIGATE: MenuPage');
                   Navigator.of(context).pushReplacementNamed('/menu');
                 },
               ),

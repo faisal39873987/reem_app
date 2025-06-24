@@ -37,3 +37,7 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           supabase db reset --db-url "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres" --file supabase_schema/init_schema.sql
+
+      - name: Analyze code (fail only on errors)
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings

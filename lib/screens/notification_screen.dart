@@ -62,7 +62,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   void _navigateTo(int index) {
-    debugPrint('NAVIGATE: NotificationScreen bottom nav to index $index');
+    // debugPrint('NAVIGATE: NotificationScreen bottom nav to index $index');
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder:
@@ -76,7 +76,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: NotificationScreen');
+    // debugPrint('BUILD: NotificationScreen');
     const blue = kPrimaryColor;
 
     return Scaffold(

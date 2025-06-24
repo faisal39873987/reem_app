@@ -6,7 +6,7 @@ class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD: MessagesScreen');
+    // debugPrint('BUILD: MessagesScreen');
     return Scaffold(
       appBar: AppBar(title: const Text('Messages')),
       body: const MessagesStreamWidget(),
