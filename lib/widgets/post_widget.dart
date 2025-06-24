@@ -8,19 +8,26 @@ class PostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Unified English UI
     final double price =
-        (post.price.isNaN || post.price.isInfinite) ? 0.0 : post.price;
+        (post.price == null || post.price!.isNaN || post.price!.isInfinite)
+            ? 0.0
+            : post.price!;
     final String imageUrl =
-        post.imageUrl.isNotEmpty ? post.imageUrl : 'https://i.pravatar.cc/300';
+        (post.imageUrl?.isNotEmpty ?? false)
+            ? post.imageUrl!
+            : 'https://i.pravatar.cc/300';
     final String description =
-        post.description.isNotEmpty ? post.description : 'No description';
+        (post.description?.isNotEmpty ?? false)
+            ? post.description!
+            : 'No description';
     final String category =
-        post.category.isNotEmpty ? post.category : 'General';
+        (post.category?.isNotEmpty ?? false) ? post.category! : 'General';
     final String creator =
-        post.isAnonymous
+        (post.isAnonymous == true)
             ? 'Anonymous User'
-            : (post.creatorId.isNotEmpty ? post.creatorId : 'User');
+            : ((post.creatorId?.isNotEmpty ?? false)
+                ? post.creatorId!
+                : 'User');
     final String date = post.timestamp.toLocal().toString().split(' ').first;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),

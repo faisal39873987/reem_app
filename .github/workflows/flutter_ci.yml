@@ -1,0 +1,58 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter 3.32.4
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.4'
+          channel: stable
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Analyze code
+        run: flutter analyze
+      - name: Run tests
+        run: flutter test --coverage
+      - name: Check for pubspec.yaml errors
+        run: |
+          if ! flutter pub get; then
+            echo 'pubspec.yaml or dependency error detected.'
+            exit 1
+          fi
+      - name: Check for YAML format errors
+        run: |
+          if ! python3 -c 'import yaml,sys; yaml.safe_load(open("pubspec.yaml"))'; then
+            echo 'YAML format error in pubspec.yaml.'
+            exit 1
+          fi
+      - name: Run Supabase migration
+        run: |
+          npx supabase db reset --file supabase_schema/init_schema.sql
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      - name: Fail if migration error
+        if: failure()
+        run: |
+          echo 'Supabase migration failed. Check init_schema.sql.'
+          exit 1
+
+  require-successful-checks:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Require all checks to pass
+        run: |
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo 'Build or tests failed. Merge blocked.'
+            exit 1
+          fi

@@ -10,9 +10,7 @@ class PostItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 3,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,7 +19,7 @@ class PostItem extends StatelessWidget {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             child: Image.network(
-              post.imageUrl,
+              post.imageUrl ?? '',
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -34,19 +32,21 @@ class PostItem extends StatelessWidget {
               children: [
                 // اسم المستخدم أو مجهول
                 Text(
-                  post.isAnonymous ? 'مستخدم مجهول' : 'مستخدم معروف',
+                  post.isAnonymous == true ? 'مستخدم مجهول' : 'مستخدم معروف',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 // الوصف
                 Text(
-                  post.description,
+                  post.description ?? '',
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 // السعر
                 Text(
-                  '${post.price.toStringAsFixed(2)} درهم',
+                  post.price != null
+                      ? '${post.price!.toStringAsFixed(2)} درهم'
+                      : '',
                   style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
@@ -57,10 +57,7 @@ class PostItem extends StatelessWidget {
                 // تاريخ النشر
                 Text(
                   'نشر بتاريخ: ${post.timestamp.toLocal().toString().split('.')[0]}',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
               ],
             ),
