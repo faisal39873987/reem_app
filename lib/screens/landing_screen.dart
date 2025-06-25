@@ -48,15 +48,16 @@ class _LandingScreenState extends State<LandingScreen> {
   void _goToAddPost() async {
     final prefs = await SharedPreferences.getInstance();
     final isGuest = prefs.getBool('isGuest') ?? false;
+    if (!mounted) return;
     if (isGuest) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login is required to access this page')),
       );
       return;
     }
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const PostCreationScreen()));
+    if (!mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PostCreationScreen()));
   }
 
   @override
@@ -131,10 +132,10 @@ class _HomePageContentState extends State<HomePageContent> {
   @override
   void initState() {
     super.initState();
-    // جلب المنشورات عند أول تحميل
-    Future.microtask(
-      () => Provider.of<FeedProvider>(context, listen: false).fetchPosts(),
-    );
+    Future.microtask(() {
+      if (!mounted) return;
+      Provider.of<FeedProvider>(context, listen: false).fetchPosts();
+    });
   }
 
   @override

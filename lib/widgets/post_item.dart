@@ -19,7 +19,7 @@ class PostItem extends StatelessWidget {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             child: Image.network(
-              post.imageUrl ?? '',
+              post.imageUrl,
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -38,7 +38,7 @@ class PostItem extends StatelessWidget {
                 const SizedBox(height: 8),
                 // الوصف
                 Text(
-                  post.description ?? '',
+                  post.description,
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),

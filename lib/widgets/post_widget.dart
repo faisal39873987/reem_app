@@ -9,9 +9,9 @@ class PostWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double price =
-        (post.price == null || post.price!.isNaN || post.price!.isInfinite)
+        (post.price == null || post.price.isNaN || post.price.isInfinite)
             ? 0.0
-            : post.price!;
+            : post.price;
     final String imageUrl =
         (post.imageUrl?.isNotEmpty ?? false)
             ? post.imageUrl!

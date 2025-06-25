@@ -41,11 +41,9 @@ final ThemeData appTheme = ThemeData(
   colorScheme: ColorScheme.light(
     primary: kPrimaryColor,
     secondary: Colors.white,
-    background: Colors.white,
     surface: Colors.white,
     onPrimary: Colors.white,
     onSecondary: kPrimaryColor,
-    onBackground: kPrimaryColor,
     onSurface: kPrimaryColor,
     error: Colors.red,
     onError: Colors.white,

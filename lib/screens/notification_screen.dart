@@ -156,10 +156,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           if (unreadCount > 0)
             TextButton(
               onPressed: () {},
-              child: Text(
-                "Mark all as read",
-                style: TextStyle(color: blue),
-              ),
+              child: Text("Mark all as read", style: TextStyle(color: blue)),
             ),
         ],
       ),

@@ -196,20 +196,18 @@ class MainMenuScreen extends StatelessWidget {
   }
 
   Future<void> _protectIfNotLoggedIn(BuildContext context) async {
-    debugPrint('MENU: Checking login status');
     final prefs = await SharedPreferences.getInstance();
     final isGuest = prefs.getBool('isGuest') ?? false;
     final session = Supabase.instance.client.auth.currentSession;
-    debugPrint('SUPABASE: Session = $session');
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (isGuest || session == null) {
-      debugPrint('NAVIGATE: To /login (from MainMenuScreen)');
       if (!context.mounted) return;
       messenger.showSnackBar(
         const SnackBar(content: Text('Login is required to access this page')),
       );
       await Future.delayed(const Duration(milliseconds: 500));
+      if (!context.mounted) return;
       navigator.pushReplacementNamed('/login');
     }
   }

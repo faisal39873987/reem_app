@@ -17,7 +17,7 @@ User? getCurrentUser() {
       email: 'test@example.com',
       phone: '',
       createdAt: '',
-      confirmedAt: '',
+      // confirmedAt: '', // إذا كان هناك استخدام لـ confirmedAt استبدله بـ emailConfirmedAt
       emailConfirmedAt: '',
       phoneConfirmedAt: '',
       lastSignInAt: '',

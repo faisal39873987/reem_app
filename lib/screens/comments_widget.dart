@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
 class CommentsWidget extends StatelessWidget {
+  const CommentsWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Card(
