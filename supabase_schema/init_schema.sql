@@ -138,3 +138,11 @@ create policy "Allow users to view their messages"
 
 -- ========== END ==========
 
+-- Enable RLS and allow profile owner to update own profile
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow profile owner to update own profile"
+  ON profiles
+  FOR UPDATE
+  USING (auth.uid() = id);
+
