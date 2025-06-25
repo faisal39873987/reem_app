@@ -14,6 +14,7 @@ import '../providers/feed_provider.dart';
 import '../widgets/post_widget.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../utils/constants.dart';
+import 'comments_widget.dart';
 
 class LandingScreen extends StatefulWidget {
   final int initialIndex;
@@ -63,7 +64,24 @@ class _LandingScreenState extends State<LandingScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       extendBody: true,
-      body: SafeArea(child: _pages[_selectedIndex]),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            _pages[_selectedIndex],
+            if (_selectedIndex == 0) ...[
+              // ✅ Widget التعليقات يظهر فقط في الصفحة الرئيسية
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child:
+                      CommentsWidget(), // تأكد من وجود هذا الودجت أو أنشئه إذا لم يكن موجودًا
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
       floatingActionButton: Transform.translate(
         offset: const Offset(0, -8),
         child: FloatingActionButton(

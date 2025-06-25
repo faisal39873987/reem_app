@@ -82,22 +82,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // debugPrint('BUILD: NotificationScreen');
     const blue = kPrimaryColor;
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (_error != null) {
       return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          leading: BackButton(color: blue),
+          title: Text('Notifications', style: TextStyle(color: blue)),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
+              Icon(Icons.error_outline, size: 64, color: Colors.red),
+              SizedBox(height: 16),
               Text(
                 _error!,
-                style: const TextStyle(fontSize: 18, color: Colors.red),
+                style: TextStyle(fontSize: 18, color: Colors.red),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -106,19 +111,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
       );
     }
     if (_notifications.isEmpty) {
-      return const Scaffold(
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          leading: BackButton(color: blue),
+          title: Text('Notifications', style: TextStyle(color: blue)),
+        ),
         body: Center(child: Text('No notifications found.')),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        leading: const BackButton(color: blue),
+        leading: BackButton(color: blue),
         title: Row(
           children: [
-            const Text(
+            Text(
               "Notifications",
               style: TextStyle(
                 fontSize: 20,
@@ -127,7 +137,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             ),
             if (unreadCount > 0) ...[
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
@@ -146,7 +156,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           if (unreadCount > 0)
             TextButton(
               onPressed: () {},
-              child: const Text(
+              child: Text(
                 "Mark all as read",
                 style: TextStyle(color: blue),
               ),

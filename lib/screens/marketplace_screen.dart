@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/feed_provider.dart';
 import '../utils/constants.dart';
 import '../models/post.dart';
+import 'post_details_screen.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   final List<Post>? testPosts;
@@ -134,11 +135,16 @@ class _MarketplaceGridItem extends StatelessWidget {
         post.description.isNotEmpty ? post.description : 'No description';
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to product details
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PostDetailsScreen(postId: post.id.toString()),
+          ),
+        );
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 3,
+        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -180,6 +186,7 @@ class _MarketplaceGridItem extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
+                            color: kPrimaryColor,
                           ),
                         ),
                       ),
@@ -199,7 +206,6 @@ class _MarketplaceGridItem extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
                     ],

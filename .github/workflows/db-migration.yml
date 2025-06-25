@@ -26,7 +26,11 @@ jobs:
       # - name: Reset DB (no --file)
       #   run: |
       #     yes | supabase db reset --db-url "postgresql://postgres:$SUPABASE_DB_PASSWORD@db.$SUPABASE_PROJECT_ID.supabase.co:5432/postgres"
-      - name: Apply schema.sql manually
+      - name: Apply schema.sql via Session Pooler
+        env:
+          SUPABASE_POOLER_USER: ${{ secrets.SUPABASE_POOLER_USER }}
+          SUPABASE_POOLER_PASSWORD: ${{ secrets.SUPABASE_POOLER_PASSWORD }}
+          SUPABASE_POOLER_HOST: ${{ secrets.SUPABASE_POOLER_HOST }}
         run: |
           sudo apt-get update && sudo apt-get install -y postgresql-client
-          psql "postgresql://postgres.achyjrdkriusgdbxvswl:4Ai5svBjlKp6GFDA@aws-0-eu-west-1.pooler.supabase.com:5432/postgres" -f supabase_schema/init_schema.sql
+          psql "postgresql://$SUPABASE_POOLER_USER:$SUPABASE_POOLER_PASSWORD@$SUPABASE_POOLER_HOST:6543/postgres" -f supabase_schema/init_schema.sql

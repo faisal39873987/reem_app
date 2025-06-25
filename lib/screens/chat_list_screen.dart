@@ -60,6 +60,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const blueColor = kPrimaryColor;
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -100,15 +101,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        iconTheme: const IconThemeData(color: kPrimaryColor),
-        title: const Text(
-          'My Chats',
-          style: TextStyle(
-            color: kPrimaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
+        leading: const BackButton(color: blueColor),
+        title: const Text('Messages', style: TextStyle(color: blueColor)),
       ),
       backgroundColor: Colors.white,
       body: StreamBuilder<List<Message>>(
