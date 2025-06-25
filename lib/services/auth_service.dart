@@ -2,8 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 final supabase = Supabase.instance.client;
 

@@ -45,7 +45,7 @@ class PostItem extends StatelessWidget {
                 // السعر
                 Text(
                   post.price != null
-                      ? '${post.price!.toStringAsFixed(2)} درهم'
+                      ? '${post.price.toStringAsFixed(2)} درهم'
                       : '',
                   style: const TextStyle(
                     color: Colors.green,

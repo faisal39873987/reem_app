@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
 class CommentsWidget extends StatelessWidget {
-  const CommentsWidget({Key? key}) : super(key: key);
+  const CommentsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

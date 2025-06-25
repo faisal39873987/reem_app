@@ -13,21 +13,15 @@ class PostWidget extends StatelessWidget {
             ? 0.0
             : post.price;
     final String imageUrl =
-        (post.imageUrl?.isNotEmpty ?? false)
-            ? post.imageUrl!
-            : 'https://i.pravatar.cc/300';
+        (post.imageUrl.isNotEmpty) ? post.imageUrl : 'https://i.pravatar.cc/300';
     final String description =
-        (post.description?.isNotEmpty ?? false)
-            ? post.description!
-            : 'No description';
+        (post.description.isNotEmpty) ? post.description : 'No description';
     final String category =
-        (post.category?.isNotEmpty ?? false) ? post.category! : 'General';
+        (post.category.isNotEmpty) ? post.category : 'General';
     final String creator =
         (post.isAnonymous == true)
             ? 'Anonymous User'
-            : ((post.creatorId?.isNotEmpty ?? false)
-                ? post.creatorId!
-                : 'User');
+            : ((post.creatorId.isNotEmpty) ? post.creatorId : 'User');
     final String date = post.timestamp.toLocal().toString().split(' ').first;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
