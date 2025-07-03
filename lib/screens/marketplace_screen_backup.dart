@@ -113,6 +113,7 @@ class _FbMarketplaceProductCardFB extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+<<<<<<< HEAD
       onTap: onTap,
       child: Container(
         width: width,
@@ -121,6 +122,19 @@ class _FbMarketplaceProductCardFB extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
         ),
+=======
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PostDetailsScreen(postId: post.id.toString()),
+          ),
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 3,
+        color: Colors.white,
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,6 +143,7 @@ class _FbMarketplaceProductCardFB extends StatelessWidget {
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
               ),
+<<<<<<< HEAD
               child: SizedBox(
                 width: width,
                 height: width,
@@ -168,6 +183,43 @@ class _FbMarketplaceProductCardFB extends StatelessWidget {
                               color: Colors.grey,
                               size: width * 0.4,
                             ),
+=======
+              child: Image.network(
+                imageUrl,
+                height: 140,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (context, error, stackTrace) => Container(
+                      height: 140,
+                      color: Colors.grey[200],
+                      child: const Center(child: Icon(Icons.broken_image)),
+                    ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.storefront,
+                        color: kPrimaryColor,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: kPrimaryColor,
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
                           ),
                         ),
               ),
@@ -220,7 +272,19 @@ class _FbMarketplaceProductCardFB extends StatelessWidget {
                         fontSize: 12,
                         color: Colors.grey.shade500,
                       ),
+<<<<<<< HEAD
                     ),
+=======
+                      const SizedBox(width: 2),
+                      Text(
+                        price.isNotEmpty ? '$price درهم' : '',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
                   ),
                 ],
               ),
@@ -231,3 +295,5 @@ class _FbMarketplaceProductCardFB extends StatelessWidget {
     );
   }
 }
+
+// Remove global _fbPlaceholder and trailing bracket

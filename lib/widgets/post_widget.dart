@@ -10,12 +10,36 @@ class PostWidget extends StatelessWidget {
   final Post post;
   const PostWidget({super.key, required this.post});
 
+<<<<<<< HEAD
   static Widget skeleton() => Card(
     margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
     elevation: 3,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     child: Padding(
       padding: const EdgeInsets.all(12),
+=======
+  @override
+  Widget build(BuildContext context) {
+    final double price =
+        (post.price == null || post.price.isNaN || post.price.isInfinite)
+            ? 0.0
+            : post.price;
+    final String imageUrl =
+        (post.imageUrl.isNotEmpty) ? post.imageUrl : 'https://i.pravatar.cc/300';
+    final String description =
+        (post.description.isNotEmpty) ? post.description : 'No description';
+    final String category =
+        (post.category.isNotEmpty) ? post.category : 'General';
+    final String creator =
+        (post.isAnonymous == true)
+            ? 'Anonymous User'
+            : ((post.creatorId.isNotEmpty) ? post.creatorId : 'User');
+    final String date = post.timestamp.toLocal().toString().split(' ').first;
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

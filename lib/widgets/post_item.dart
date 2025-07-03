@@ -24,6 +24,7 @@ class PostItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+<<<<<<< HEAD
             child: AspectRatio(
               aspectRatio: 1,
               child: Image.network(
@@ -39,6 +40,13 @@ class PostItem extends StatelessWidget {
                       child: const Center(child: Icon(Icons.broken_image)),
                     ),
               ),
+=======
+            child: Image.network(
+              post.imageUrl,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
             ),
           ),
           Padding(
@@ -51,10 +59,24 @@ class PostItem extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
+<<<<<<< HEAD
                 Text(description, style: const TextStyle(fontSize: 16)),
+=======
+                // الوصف
+                Text(
+                  post.description,
+                  style: const TextStyle(fontSize: 16),
+                ),
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
                 const SizedBox(height: 8),
                 Text(
+<<<<<<< HEAD
                   '$price AED',
+=======
+                  post.price != null
+                      ? '${post.price.toStringAsFixed(2)} درهم'
+                      : '',
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
                   style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,

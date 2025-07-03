@@ -16,7 +16,7 @@ void main() {
       final service = AuthService();
       await service.signInAnonymously();
       expect(service.currentUser, isNotNull);
-      await service.signOut();
+      await service.signOut(null);
       expect(service.currentUser, isNull);
     });
   });

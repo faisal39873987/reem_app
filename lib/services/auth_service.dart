@@ -2,8 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -64,26 +62,21 @@ class AuthService {
   Future<AuthResponse> signUpWithEmailPassword({
     required String email,
     required String password,
-    String? name,
-    String? phone,
-    String? birthDate,
-    BuildContext? context,
+    required String name,
+    required String phone,
+    required String birthDate,
   }) async {
-    final response = await supabase.auth.signUp(
+    final res = await Supabase.instance.client.auth.signUp(
       email: email,
       password: password,
+      data: {
+        'full_name': name,
+        'phone': phone,
+        'birth_date': birthDate,
+      },
     );
-    final user = response.user;
-    if (user != null) {
-      await createUserProfile(
-        id: user.id,
-        email: user.email ?? email,
-        fullName: name ?? '',
-        avatarUrl: '',
-        context: context,
-      );
-    }
-    return response;
+    // لا يوجد استخدام مباشر لـ context هنا
+    return res;
   }
 
   // ✅ Anonymous Sign-in
@@ -155,13 +148,10 @@ class AuthService {
   }
 
   // ✅ Sign-out
-  Future<void> signOut() async {
-    await supabase.auth.signOut();
-    if (Platform.environment.containsKey('FLUTTER_TEST') ||
-        (const bool.hasEnvironment('FLUTTER_TEST') &&
-            const bool.fromEnvironment('FLUTTER_TEST'))) {
-      _testUser = null;
-    }
+  Future<void> signOut(BuildContext context) async {
+    await Supabase.instance.client.auth.signOut();
+    if (!context.mounted) return;
+    Navigator.of(context).pushReplacementNamed('/login');
   }
 
   // ✅ Get current user
@@ -189,90 +179,20 @@ class AuthService {
   ) async {
     setLoading(true);
     try {
-      // فحص اتصال الإنترنت أولاً
-      final result = await InternetAddress.lookup('example.com');
-      if (result.isEmpty || result[0].rawAddress.isEmpty) {
-        throw SocketException('No Internet');
-      }
-      final response = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      if (response.session != null && response.user != null) {
-        if (context.mounted) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.remove('isGuest');
-          Navigator.of(context).pushReplacementNamed('/landing');
-        }
+      final res = await Supabase.instance.client.auth.signInWithPassword(email: email, password: password);
+      if (!context.mounted) return;
+      if (res.user != null) {
+        Navigator.of(context).pushReplacementNamed('/landing');
       } else {
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            builder:
-                (ctx) => AlertDialog(
-                  title: const Text('Login Failed'),
-                  content: const Text('Email or password is incorrect.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ),
-          );
-        }
-      }
-    } on SocketException catch (_) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (ctx) => AlertDialog(
-                title: const Text('No Internet'),
-                content: const Text('Please check your internet connection.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-        );
-      }
-    } on http.ClientException catch (_) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (ctx) => AlertDialog(
-                title: const Text('No Internet'),
-                content: const Text('Please check your internet connection.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please try again.')),
         );
       }
     } catch (e) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (ctx) => AlertDialog(
-                title: const Text('Error'),
-                content: Text(e.toString()),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-        );
-      }
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     } finally {
       setLoading(false);
     }

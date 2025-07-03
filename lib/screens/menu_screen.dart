@@ -245,18 +245,39 @@ class _MenuScreenState extends State<MenuScreen> {
       ),
     );
   }
+
+  Future<void> _protectIfNotLoggedIn(BuildContext context) async {
+    debugPrint('MENU: Checking login status');
+    final prefs = await SharedPreferences.getInstance();
+    final isGuest = prefs.getBool('isGuest') ?? false;
+    final session = Supabase.instance.client.auth.currentSession;
+    debugPrint('SUPABASE: Session = $session');
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    if (isGuest || session == null) {
+      debugPrint('NAVIGATE: To /login (from MainMenuScreen)');
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Login is required to access this page')),
+      );
+      await Future.delayed(const Duration(milliseconds: 500));
+      navigator.pushReplacementNamed('/login');
+    }
+  }
 }
 
 class MenuItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  
   const MenuItem({
     super.key,
     required this.icon,
     required this.label,
     required this.onTap,
   });
+
   @override
   Widget build(BuildContext context) {
     return ListTile(

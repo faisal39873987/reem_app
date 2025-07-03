@@ -76,9 +76,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     const blue = kPrimaryColor;
     if (_loading) {
+<<<<<<< HEAD
       return Scaffold(
         body: Center(child: SkeletonLoader(height: 64, count: 6)),
       );
+=======
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
     }
     if (_error != null) {
       return Scaffold(
@@ -86,9 +90,26 @@ class _NotificationScreenState extends State<NotificationScreen> {
           backgroundColor: Colors.white,
           elevation: 1,
           leading: BackButton(color: blue),
+<<<<<<< HEAD
           title: Text(
             'Notifications',
             style: TextStyle(color: blue, fontFamily: 'SFPro'),
+=======
+          title: Text('Notifications', style: TextStyle(color: blue)),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red),
+              SizedBox(height: 16),
+              Text(
+                _error!,
+                style: TextStyle(fontSize: 18, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ],
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
           ),
         ),
         body: ErrorState(message: _error!, onRetry: _fetchNotifications),
@@ -100,6 +121,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           backgroundColor: Colors.white,
           elevation: 1,
           leading: BackButton(color: blue),
+<<<<<<< HEAD
           title: Text(
             'Notifications',
             style: TextStyle(color: blue, fontFamily: 'SFPro'),
@@ -109,17 +131,26 @@ class _NotificationScreenState extends State<NotificationScreen> {
           message: 'No notifications found.',
           icon: Icons.notifications_none,
         ),
+=======
+          title: Text('Notifications', style: TextStyle(color: blue)),
+        ),
+        body: Center(child: Text('No notifications found.')),
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
       );
     }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
+<<<<<<< HEAD
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: blue),
           onPressed:
               () => Navigator.of(context).pushReplacementNamed('/landing'),
         ),
+=======
+        leading: BackButton(color: blue),
+>>>>>>> 7376d04ed9157adca11b4d81bfec7683e877da79
         title: Row(
           children: [
             Text(
