@@ -17,7 +17,8 @@ class LocationService {
 
     if (permission == LocationPermission.deniedForever) {
       return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
+        'Location permissions are permanently denied, we cannot request permissions.',
+      );
     }
 
     return await Geolocator.getCurrentPosition();
@@ -29,6 +30,7 @@ class LocationService {
     double endLat,
     double endLng,
   ) {
-    return Geolocator.distanceBetween(startLat, startLng, endLat, endLng) / 1000;
+    return Geolocator.distanceBetween(startLat, startLng, endLat, endLng) /
+        1000;
   }
 }

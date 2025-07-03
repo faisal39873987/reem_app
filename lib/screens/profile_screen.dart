@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../utils/constants.dart';
 import '../models/profile.dart';
 import '../utils/test_user_override.dart';
+import '../widgets/media_picker_widget.dart';
+import '../widgets/rv_bottom_nav_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isOwner;
@@ -28,7 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _profileImage;
   String _photoUrl = '';
   bool _isLoading = true;
-  bool _showInReemYouth = true;
 
   Profile? _profile;
 
@@ -42,7 +42,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _phoneController.text = _profile?.phone ?? '';
       _noteController.text = _profile?.note ?? '';
       _photoUrl = _profile?.avatarUrl ?? '';
-      _showInReemYouth = _profile?.showInReemYouth ?? true;
       setState(() => _isLoading = false);
     } else {
       _protectIfNotLoggedIn();
@@ -85,7 +84,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _phoneController.text = profile?.phone ?? '';
         _noteController.text = profile?.note ?? '';
         _photoUrl = profile?.avatarUrl ?? '';
-        _showInReemYouth = profile?.showInReemYouth ?? true;
         _isLoading = false;
       });
     } catch (e) {
@@ -135,7 +133,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'phone': _phoneController.text.trim(),
             'note': _noteController.text.trim(),
             'avatar_url': newImageUrl,
-            'show_in_reem_youth': _showInReemYouth,
           })
           .eq('id', user.id);
 
@@ -160,39 +157,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (!mounted) return;
-    if (picked != null) {
-      setState(() => _profileImage = File(picked.path));
-    }
-  }
-
   Widget _buildAvatar() {
-    ImageProvider imageProvider;
-    if (_profileImage != null) {
-      imageProvider = FileImage(_profileImage!);
-    } else if (_photoUrl.isNotEmpty) {
-      imageProvider = NetworkImage(_photoUrl);
-    } else {
-      imageProvider = NetworkImage(
-        'https://ui-avatars.com/api/?name=${Uri.encodeComponent(_userName)}&background=0D8ABC&color=fff',
-      );
-    }
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: Colors.grey[200],
-          backgroundImage: imageProvider,
-        ),
-        if (widget.isOwner)
-          IconButton(
-            icon: const Icon(Icons.camera_alt, color: kPrimaryColor),
-            onPressed: _pickImage,
-          ),
-      ],
+    return MediaPickerWidget(
+      onChanged: (file) => setState(() => _profileImage = file),
+      initialFile: _profileImage,
+      size: 120,
+      isVideo: false,
     );
   }
 
@@ -227,17 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Stack(
                       alignment: Alignment.bottomRight,
-                      children: [
-                        _buildAvatar(),
-                        if (isOwner)
-                          IconButton(
-                            icon: const Icon(
-                              Icons.camera_alt,
-                              color: kPrimaryColor,
-                            ),
-                            onPressed: _pickImage,
-                          ),
-                      ],
+                      children: [_buildAvatar()],
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -254,18 +214,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 16),
                     _buildEditableField("Note", _noteController, isOwner),
                     const SizedBox(height: 16),
-                    if (isOwner)
-                      SwitchListTile(
-                        title: const Text("Appear in Reem Youth"),
-                        value: _showInReemYouth,
-                        onChanged: (val) {
-                          if (!mounted) return;
-                          setState(() => _showInReemYouth = val);
-                        },
-                      ),
                   ],
                 ),
               ),
+      bottomNavigationBar: const RVBottomNavBar(currentIndex: 4),
     );
   }
 

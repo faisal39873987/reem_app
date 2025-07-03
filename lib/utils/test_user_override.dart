@@ -17,7 +17,6 @@ User? getCurrentUser() {
       email: 'test@example.com',
       phone: '',
       createdAt: '',
-      confirmedAt: '',
       emailConfirmedAt: '',
       phoneConfirmedAt: '',
       lastSignInAt: '',

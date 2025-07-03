@@ -12,11 +12,5 @@ class LocaleProvider extends ChangeNotifier {
 }
 
 class L10n {
-  static final all = [
-    const Locale('en'),
-    const Locale('ar'),
-    const Locale('ur'),
-    const Locale('tl'),
-    const Locale('ru'),
-  ];
+  static final all = [const Locale('en')];
 }

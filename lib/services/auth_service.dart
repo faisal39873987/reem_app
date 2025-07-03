@@ -99,7 +99,6 @@ class AuthService {
         email: 'test@example.com',
         phone: '',
         createdAt: '',
-        confirmedAt: '',
         emailConfirmedAt: '',
         phoneConfirmedAt: '',
         lastSignInAt: '',

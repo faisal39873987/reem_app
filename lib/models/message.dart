@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class Message {
   final String id;
   final String senderId;
@@ -14,6 +16,12 @@ class Message {
     required this.isRead,
     required this.createdAt,
   });
+
+  // Check if this message is from the current user
+  bool get isMine {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    return currentUser != null && senderId == currentUser.id;
+  }
 
   factory Message.fromMap(Map<String, dynamic> data) {
     String parseString(dynamic value) {

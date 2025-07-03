@@ -45,13 +45,19 @@ class ContactUsScreen extends StatelessWidget {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kPrimaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
                 onPressed: _launchEmail,
                 icon: const Icon(Icons.email, color: Colors.white),
-                label: const Text('Send Email', style: TextStyle(color: Colors.white)),
+                label: const Text(
+                  'Send Email',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
-            )
+            ),
           ],
         ),
       ),

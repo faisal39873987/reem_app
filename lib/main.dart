@@ -10,9 +10,13 @@ import 'screens/landing_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/notification_screen.dart';
 import 'screens/marketplace_screen.dart';
+import 'screens/marketplace_add_screen.dart';
+import 'screens/marketplace_details_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/post_creation_screen.dart';
+import 'screens/messages_screen.dart';
 import 'screens/search_screen.dart';
+import 'screens/post_details_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'providers/locale_provider.dart';
@@ -60,6 +64,30 @@ class _MyAppState extends State<MyApp> {
             theme: appTheme, // ⚠️ تأكد أنه معرف في utils/theme.dart
             locale: provider.locale,
             home: AuthRedirect(),
+            onGenerateRoute: (settings) {
+              if (settings.name == '/post-details') {
+                final args = settings.arguments as Map<String, dynamic>?;
+                final postId = args?['postId'] as String?;
+                if (postId != null) {
+                  return MaterialPageRoute(
+                    builder: (_) => PostDetailsScreen(postId: postId),
+                  );
+                }
+              }
+
+              if (settings.name == '/marketplace-details') {
+                final args = settings.arguments as Map<String, dynamic>?;
+                final productId = args?['productId'] as String?;
+                if (productId != null) {
+                  return MaterialPageRoute(
+                    builder:
+                        (_) => MarketplaceDetailsScreen(productId: productId),
+                  );
+                }
+              }
+
+              return null;
+            },
             routes: {
               '/login': (_) => const LoginScreen(),
               '/signup': (_) => const SignupScreen(),
@@ -68,8 +96,10 @@ class _MyAppState extends State<MyApp> {
               '/profile': (_) => const ProfileScreen(),
               '/notifications': (_) => const NotificationScreen(),
               '/marketplace': (_) => const MarketplaceScreen(),
-              '/menu': (_) => const MainMenuScreen(),
+              '/marketplace_add': (_) => const MarketplaceAddScreen(),
+              '/menu': (_) => const MenuScreen(),
               '/post': (_) => const PostCreationScreen(),
+              '/messages': (_) => const MessagesScreen(),
               '/search': (_) => const SearchScreen(),
               // '/post_details': (_) => const PostDetailsScreen(), // ❌ Removed, must use MaterialPageRoute with postId
             },

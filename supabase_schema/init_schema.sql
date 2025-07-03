@@ -9,8 +9,7 @@ create table if not exists profiles (
   created_at timestamptz default now(),
   bio text,
   phone text,
-  note text,
-  show_in_reem_youth boolean default false
+  note text
 );
 
 -- Posts Table
@@ -54,12 +53,43 @@ create table if not exists messages (
   created_at timestamptz default now()
 );
 
+-- Post Likes Table
+create table if not exists post_likes (
+  id uuid primary key default uuid_generate_v4(),
+  post_id bigint references posts(id) on delete cascade,
+  user_id uuid references profiles(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique(post_id, user_id)
+);
+
+-- Posts Details Table (for LandingPage Posts)
+CREATE TABLE IF NOT EXISTS post_details (
+  id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  post_id bigint REFERENCES posts(id) ON DELETE CASCADE,
+  content text,
+  images text[],
+  created_at timestamptz DEFAULT now()
+);
+
+-- Marketplace Details Table (for Marketplace Products)
+CREATE TABLE IF NOT EXISTS marketplace_details (
+  id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  product_id uuid REFERENCES marketplace(id) ON DELETE CASCADE,
+  description text,
+  additional_images text[],
+  seller_notes text,
+  created_at timestamptz DEFAULT now()
+);
+
 -- ========== ENABLE RLS ==========
 alter table profiles enable row level security;
 alter table posts enable row level security;
 alter table marketplace enable row level security;
 alter table notifications enable row level security;
 alter table messages enable row level security;
+alter table post_likes enable row level security;
+alter table post_details enable row level security;
+alter table marketplace_details enable row level security;
 
 -- ========== POLICIES ==========
 
@@ -136,5 +166,51 @@ create policy "Allow users to delete their own sent messages"
 create policy "Allow users to view their messages"
   on messages for select using (auth.uid() = sender_id OR auth.uid() = receiver_id);
 
+-- Post Likes Policies
+drop policy if exists "Allow users to view post likes" on post_likes;
+drop policy if exists "Allow users to insert post likes" on post_likes;
+drop policy if exists "Allow users to delete their own post likes" on post_likes;
+
+create policy "Allow users to view post likes"
+  on post_likes for select using (true);
+
+create policy "Allow users to insert post likes"
+  on post_likes for insert with check (auth.uid() = user_id);
+
+create policy "Allow users to delete their own post likes"
+  on post_likes for delete using (auth.uid() = user_id);
+
+-- Post Details Policies
+drop policy if exists "Allow all users to view post details" on post_details;
+drop policy if exists "Allow authors manage own post details" on post_details;
+
+create policy "Allow all users to view post details"
+  on post_details for select using (true);
+
+create policy "Allow authors manage own post details"
+  on post_details for all using (
+    post_id in (select id from posts where user_id = auth.uid())
+  );
+
+-- Marketplace Details Policies
+drop policy if exists "Allow all users to view marketplace details" on marketplace_details;
+drop policy if exists "Allow sellers manage own marketplace details" on marketplace_details;
+
+create policy "Allow all users to view marketplace details"
+  on marketplace_details for select using (true);
+
+create policy "Allow sellers manage own marketplace details"
+  on marketplace_details for all using (
+    product_id in (select id from marketplace where user_id = auth.uid())
+  );
+
 -- ========== END ==========
+
+-- Enable RLS and allow profile owner to update own profile
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow profile owner to update own profile"
+  ON profiles
+  FOR UPDATE
+  USING (auth.uid() = id);
 

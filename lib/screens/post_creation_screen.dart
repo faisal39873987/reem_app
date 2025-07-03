@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart'; // حذف الاستيراد لأنه غير مستخدم
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/constants.dart';
 import '../models/post.dart';
+import '../widgets/media_picker_widget.dart';
 
 class PostCreationScreen extends StatefulWidget {
   final void Function(Post)? testOnSubmit;
@@ -20,62 +20,16 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   bool _isAnonymous = false;
-  bool _showDistance = false;
+  // bool _showDistance = false; // حذف خيار المسافة
   bool _isLoading = false;
-  double? _latitude;
-  double? _longitude;
+  // double? _latitude;
+  // double? _longitude;
   String _selectedCategory = 'General';
+  bool _isMarketplace = false; // جديد: خيار النشر في الماركت بليس
 
-  final picker = ImagePicker();
-
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  Future<void> _getLocation() async {
-    final messenger = ScaffoldMessenger.of(context);
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.unableToDetermine) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text("Location permission is required to show distance."),
-        ),
-      );
-      return;
-    }
-
-    final position = await Geolocator.getCurrentPosition();
-    if (!mounted) return;
-    setState(() {
-      _latitude = position.latitude;
-      _longitude = position.longitude;
-    });
-  }
-
-  Future<void> _pickImage() async {
-    try {
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-      if (!mounted) return;
-      if (pickedFile != null) {
-        setState(() => _imageFile = File(pickedFile.path));
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnack('Failed to pick image: ${e.toString()}');
-    }
-  }
+  // TODO: Use Supabase Storage for media upload with progress and error handling
+  // TODO: Modularize image/video picker as a reusable widget
+  // TODO: Add permission checks for post creation (admin/mod/user/guest)
 
   void _submit() async {
     if (widget.testOnSubmit != null) {
@@ -84,6 +38,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
         Post(
           id: 'test',
           imageUrl: '',
+          images: const [],
           description: _descriptionController.text,
           price: double.tryParse(_priceController.text) ?? 0.0,
           creatorId: 'test',
@@ -109,7 +64,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
       return;
     }
 
-    if (_priceController.text.trim().isEmpty) {
+    if (_isMarketplace && _priceController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please enter a price.")));
@@ -120,29 +75,44 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
       _selectedCategory = 'General';
     }
 
-    if (_showDistance && (_latitude == null || _longitude == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please allow location access to show distance."),
-        ),
-      );
-      return;
-    }
+    // تم حذف شرط المسافة
 
     try {
       setState(() => _isLoading = true);
-      // Send postData to your backend or database
-      // await sendDataToBackend(postData);
-      debugPrint('POST: Post uploaded successfully');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Post created successfully!")),
-      );
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) {
-          debugPrint('NAVIGATE: To /landing (from PostCreationScreen)');
-          Navigator.of(context).pushReplacementNamed('/landing');
-        }
-      });
+      if (_isMarketplace) {
+        // نشر في الماركت بليس
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user == null) throw Exception('Not authenticated');
+        await Supabase.instance.client.from('marketplace').insert({
+          'user_id': user.id,
+          'title': _descriptionController.text.trim(),
+          'description': _descriptionController.text.trim(),
+          'price': double.tryParse(_priceController.text) ?? 0.0,
+          'image_url': '', // TODO: دعم رفع صورة المنتج
+          'created_at': DateTime.now().toIso8601String(),
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Product posted to marketplace!")),
+        );
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/marketplace');
+          }
+        });
+      } else {
+        // نشر كمنشور عادي
+        // Send postData to your backend or database
+        // await sendDataToBackend(postData);
+        debugPrint('POST: Post uploaded successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Post created successfully!")),
+        );
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/landing');
+          }
+        });
+      }
     } catch (e) {
       debugPrint("❌ Upload Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -181,9 +151,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
   @override
   Widget build(BuildContext context) {
     debugPrint('BUILD: PostCreationScreen');
-
     const blueColor = kPrimaryColor;
-
     return Scaffold(
       backgroundColor: Colors.white,
       extendBody: true,
@@ -209,6 +177,7 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
                     ),
                   ),
                   const Spacer(),
+                  // TODO: Add more actions if needed (e.g., save draft, preview)
                 ],
               ),
             ),
@@ -218,62 +187,35 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child:
-                          _imageFile == null
-                              ? Container(
-                                width: 150,
-                                height: 150,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(Icons.add_a_photo, size: 50),
-                              )
-                              : ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  _imageFile!,
-                                  width: 150,
-                                  height: 150,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                    MediaPickerWidget(
+                      onChanged: (file) => setState(() => _imageFile = file),
+                      initialFile: _imageFile,
+                      size: 150,
+                      isVideo: false, // TODO: Add video support
                     ),
                     const SizedBox(height: 20),
-                    DropdownButtonFormField<String>(
-                      value:
-                          _selectedCategory.isEmpty
-                              ? 'General'
-                              : _selectedCategory,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'General',
-                          child: Text('General'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'For Sale',
-                          child: Text('For Sale'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'For Rent',
-                          child: Text('For Rent'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Public Service',
-                          child: Text('Public Service'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Advertisement',
-                          child: Text('Advertisement'),
-                        ),
-                      ],
-                      onChanged:
-                          (value) => setState(() => _selectedCategory = value!),
-                      decoration: const InputDecoration(labelText: 'Category'),
+                    SwitchListTile(
+                      title: const Text("Post as product in marketplace?"),
+                      value: _isMarketplace,
+                      onChanged: (val) => setState(() => _isMarketplace = val),
                     ),
-                    const SizedBox(height: 20),
+                    if (_isMarketplace) ...[
+                      MediaPickerWidget(
+                        onChanged: (file) => setState(() => _imageFile = file),
+                        initialFile: _imageFile,
+                        size: 150,
+                        isVideo: false,
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _priceController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: "Price (AED)",
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     TextField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -282,27 +224,49 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
                       maxLines: 2,
                     ),
                     const SizedBox(height: 20),
-                    TextField(
-                      controller: _priceController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Price (AED)",
+                    if (!_isMarketplace) ...[
+                      DropdownButtonFormField<String>(
+                        value:
+                            _selectedCategory.isEmpty
+                                ? 'General'
+                                : _selectedCategory,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'General',
+                            child: Text('General'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'For Sale',
+                            child: Text('For Sale'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'For Rent',
+                            child: Text('For Rent'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Public Service',
+                            child: Text('Public Service'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Advertisement',
+                            child: Text('Advertisement'),
+                          ),
+                        ],
+                        onChanged:
+                            (value) =>
+                                setState(() => _selectedCategory = value!),
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
+                    ],
                     SwitchListTile(
                       title: const Text("Post as anonymous?"),
                       value: _isAnonymous,
                       onChanged: (val) => setState(() => _isAnonymous = val),
                     ),
-                    SwitchListTile(
-                      title: const Text("Show distance to post?"),
-                      value: _showDistance,
-                      onChanged: (val) async {
-                        setState(() => _showDistance = val);
-                        if (val) await _getLocation();
-                      },
-                    ),
+                    // تم حذف خيار المسافة
                     const SizedBox(height: 30),
                     _isLoading
                         ? const CircularProgressIndicator()
@@ -312,7 +276,11 @@ class _PostCreationScreenState extends State<PostCreationScreen> {
                             minimumSize: const Size(double.infinity, 50),
                             backgroundColor: blueColor,
                           ),
-                          child: const Text("Submit Post"),
+                          child: Text(
+                            _isMarketplace
+                                ? "نشر في الماركت بليس"
+                                : "Submit Post",
+                          ),
                         ),
                   ],
                 ),

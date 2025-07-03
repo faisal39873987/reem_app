@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'post_creation_screen.dart';
-import 'landing_screen.dart';
 import '../utils/constants.dart';
 import '../models/notification.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/error_state.dart';
+import '../widgets/skeleton_loader.dart';
+import '../widgets/rv_bottom_nav_bar.dart';
 
 class NotificationScreen extends StatefulWidget {
   final List<AppNotification>? testNotifications;
@@ -19,6 +21,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   List<AppNotification> _notifications = [];
   bool _loading = true;
   String? _error;
+  // TODO: Use Supabase real-time stream for notifications
+  // TODO: Modularize notification tile, actions, and permissions
+  // TODO: Add admin/moderator notification controls
 
   @override
   void initState() {
@@ -67,58 +72,57 @@ class _NotificationScreenState extends State<NotificationScreen> {
     ).showSnackBar(const SnackBar(content: Text('Notifications refreshed.')));
   }
 
-  void _navigateTo(int index) {
-    // debugPrint('NAVIGATE: NotificationScreen bottom nav to index $index');
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder:
-            (context, animation, secondaryAnimation) =>
-                LandingScreen(initialIndex: index),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // debugPrint('BUILD: NotificationScreen');
     const blue = kPrimaryColor;
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Center(child: SkeletonLoader(height: 64, count: 6)),
+      );
     }
     if (_error != null) {
       return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                _error!,
-                style: const TextStyle(fontSize: 18, color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            ],
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          leading: BackButton(color: blue),
+          title: Text(
+            'Notifications',
+            style: TextStyle(color: blue, fontFamily: 'SFPro'),
           ),
         ),
+        body: ErrorState(message: _error!, onRetry: _fetchNotifications),
       );
     }
     if (_notifications.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('No notifications found.')),
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          leading: BackButton(color: blue),
+          title: Text(
+            'Notifications',
+            style: TextStyle(color: blue, fontFamily: 'SFPro'),
+          ),
+        ),
+        body: const EmptyState(
+          message: 'No notifications found.',
+          icon: Icons.notifications_none,
+        ),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        leading: const BackButton(color: blue),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: blue),
+          onPressed:
+              () => Navigator.of(context).pushReplacementNamed('/landing'),
+        ),
         title: Row(
           children: [
-            const Text(
+            Text(
               "Notifications",
               style: TextStyle(
                 fontSize: 20,
@@ -127,7 +131,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             ),
             if (unreadCount > 0) ...[
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
@@ -146,10 +150,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           if (unreadCount > 0)
             TextButton(
               onPressed: () {},
-              child: const Text(
-                "Mark all as read",
-                style: TextStyle(color: blue),
-              ),
+              child: Text("Mark all as read", style: TextStyle(color: blue)),
             ),
         ],
       ),
@@ -252,47 +253,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
         offset: const Offset(0, -8),
         child: FloatingActionButton(
           heroTag: 'fab_notification',
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PostCreationScreen()),
-            );
-          },
+          onPressed: () => Navigator.of(context).pushNamed('/post'),
           backgroundColor: blue,
           shape: const CircleBorder(),
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.home, color: blue),
-                onPressed: () => _navigateTo(0),
-              ),
-              IconButton(
-                icon: const Icon(Icons.store, color: blue),
-                onPressed: () => _navigateTo(1),
-              ),
-              const SizedBox(width: 40),
-              IconButton(
-                icon: const Icon(Icons.person, color: blue),
-                onPressed: () => _navigateTo(2),
-              ),
-              IconButton(
-                icon: const Icon(Icons.menu, color: blue),
-                onPressed: () => _navigateTo(3),
-              ),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: const RVBottomNavBar(currentIndex: 3),
     );
   }
 }

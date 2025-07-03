@@ -20,6 +20,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  // TODO: Use Supabase real-time stream for messages
+  // TODO: Modularize message bubble, input, and reactions
+  // TODO: Add permissions for chat (block/report/admin)
   @override
   void initState() {
     super.initState();
@@ -29,7 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     debugPrint('BUILD: ChatScreen');
     const blueColor = kPrimaryColor;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -58,11 +60,40 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       backgroundColor: Colors.white,
-      body: const Center(
-        child: Text(
-          "Chats will be available soon after Supabase integration.",
-          style: TextStyle(fontSize: 16),
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              // TODO: Replace with real-time message list
+              child: Text(
+                "Chats will be available soon after Supabase integration.",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+          // TODO: Modular message input with media, emoji, reactions
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Type a message...",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send, color: blueColor),
+                  onPressed: () {
+                    // TODO: Send message logic
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

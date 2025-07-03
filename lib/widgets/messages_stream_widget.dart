@@ -34,9 +34,7 @@ class MessagesStreamWidget extends StatelessWidget {
             final msg = messages[i];
             return ListTile(
               title: Text(msg.content),
-              subtitle: Text(
-                'From: ${msg.senderId}  To: ${msg.receiverId}',
-              ),
+              subtitle: Text('From: ${msg.senderId}  To: ${msg.receiverId}'),
               trailing:
                   msg.isRead == true
                       ? const Icon(Icons.done_all, color: Colors.blue, size: 18)

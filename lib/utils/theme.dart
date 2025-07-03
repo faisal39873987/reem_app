@@ -6,6 +6,7 @@ final ThemeData appTheme = ThemeData(
   brightness: Brightness.light,
   scaffoldBackgroundColor: kBackgroundColor,
   primaryColor: kPrimaryColor,
+  fontFamily: 'SFPro',
   appBarTheme: const AppBarTheme(
     backgroundColor: kBackgroundColor,
     elevation: 1,
@@ -14,6 +15,7 @@ final ThemeData appTheme = ThemeData(
       color: kPrimaryColor,
       fontWeight: FontWeight.bold,
       fontSize: 20,
+      fontFamily: 'SFPro',
     ),
   ),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -27,21 +29,25 @@ final ThemeData appTheme = ThemeData(
       foregroundColor: Colors.white,
       textStyle: const TextStyle(fontSize: 16),
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
   ),
   textTheme: const TextTheme(
-    bodyLarge: TextStyle(color: kTextDark, fontSize: 16),
-    bodyMedium: TextStyle(color: kTextDark, fontSize: 14),
-    labelLarge: TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold),
+    bodyLarge: TextStyle(color: kTextDark),
+    bodyMedium: TextStyle(color: kTextDark),
+    bodySmall: TextStyle(color: kTextDark),
+    titleLarge: TextStyle(color: kPrimaryColor),
+    titleMedium: TextStyle(color: kPrimaryColor),
+    titleSmall: TextStyle(color: kPrimaryColor),
   ),
-  inputDecorationTheme: InputDecorationTheme(
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Colors.black26),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  colorScheme: ColorScheme.light(
+    primary: kPrimaryColor,
+    secondary: Colors.white,
+    surface: Colors.white,
+    onPrimary: Colors.white,
+    onSecondary: kPrimaryColor,
+    onSurface: kPrimaryColor,
+    error: Colors.red,
+    onError: Colors.white,
   ),
 );

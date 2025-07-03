@@ -5,7 +5,6 @@ class Profile {
   final String phone;
   final String note;
   final String avatarUrl;
-  final bool showInReemYouth;
 
   Profile({
     required this.id,
@@ -14,7 +13,6 @@ class Profile {
     required this.phone,
     required this.note,
     required this.avatarUrl,
-    required this.showInReemYouth,
   });
 
   factory Profile.fromMap(Map<String, dynamic> data) {
@@ -25,14 +23,6 @@ class Profile {
       return value.toString();
     }
 
-    bool parseBool(dynamic value) {
-      if (value == null) return true;
-      if (value is bool) return value;
-      if (value is int) return value == 1;
-      if (value is String) return value == 'true' || value == '1';
-      return true;
-    }
-
     return Profile(
       id: parseString(data['id']),
       fullName: parseString(data['full_name']),
@@ -40,7 +30,6 @@ class Profile {
       phone: parseString(data['phone']),
       note: parseString(data['note']),
       avatarUrl: parseString(data['avatar_url']),
-      showInReemYouth: parseBool(data['show_in_reem_youth']),
     );
   }
 }
