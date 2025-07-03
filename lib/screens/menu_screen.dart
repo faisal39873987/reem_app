@@ -40,15 +40,19 @@ class _MenuScreenState extends State<MenuScreen> {
         });
 
         // Get user profile from profiles table
-        final profileData = await _supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .maybeSingle();
+        final profileData =
+            await _supabase
+                .from('profiles')
+                .select()
+                .eq('id', user.id)
+                .maybeSingle();
 
         if (profileData != null && mounted) {
           setState(() {
-            userName = profileData['full_name'] ?? user.email?.split('@')[0] ?? 'مستخدم';
+            userName =
+                profileData['full_name'] ??
+                user.email?.split('@')[0] ??
+                'مستخدم';
             userAvatar = profileData['avatar_url'];
           });
         }
@@ -73,9 +77,11 @@ class _MenuScreenState extends State<MenuScreen> {
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundImage: userAvatar != null
-                        ? NetworkImage(userAvatar!)
-                        : const AssetImage('assets/images/default_user.png') as ImageProvider,
+                    backgroundImage:
+                        userAvatar != null
+                            ? NetworkImage(userAvatar!)
+                            : const AssetImage('assets/images/default_user.png')
+                                as ImageProvider,
                     backgroundColor: Colors.grey.shade300,
                   ),
                   const SizedBox(width: 16),
@@ -200,21 +206,23 @@ class _MenuScreenState extends State<MenuScreen> {
                       try {
                         // Sign out from Supabase
                         await Supabase.instance.client.auth.signOut();
-                        
+
                         // Clear SharedPreferences
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.setBool('isLoggedIn', false);
-                        
+
                         if (!context.mounted) return;
-                        
+
                         // Navigate to login screen
                         Navigator.of(
                           context,
                         ).pushNamedAndRemoveUntil('/login', (route) => false);
-                        
+
                         // Show success message
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('تم تسجيل الخروج بنجاح')),
+                          const SnackBar(
+                            content: Text('تم تسجيل الخروج بنجاح'),
+                          ),
                         );
                       } catch (e) {
                         // Show error message
